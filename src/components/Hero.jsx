@@ -1,68 +1,105 @@
 
 import React from "react";
-import PropTypes from "prop-types";
-import "./Hero.css";
+import { useNavigate } from "react-router-dom";
 
-/**
- * Reusable hero/landing section with optional actions.
- * Props allow the parent to customize text and button handlers.
- */
-function Hero({
-  title,
-  subtitle,
-  primaryText,
-  secondaryText,
-  onPrimaryClick,
-  onSecondaryClick
-}) {
-  console.log("Hero props:", { title, subtitle, primaryText, secondaryText });
+function Hero() {
+
+  const navigate = useNavigate();
+
+  const handleBegin = () => {
+    navigate("/dashboard");
+  };
+
+  const handleLearn = () => {
+    document.getElementById("features")?.scrollIntoView({
+      behavior: "smooth"
+    });
+  };
+
   return (
-    <section className="hero" role="banner">
-      <header className="hero__container">
-        <h1 className="hero__heading">{title}</h1>
-        <p className="hero__subtext">{subtitle}</p>
-        <div className="hero__buttons">
-          {primaryText && (
-            <button
-              className="hero__btn hero__btn--primary"
-              onClick={onPrimaryClick}
-              aria-label={primaryText}
-            >
-              {primaryText}
-            </button>
-          )}
-          {secondaryText && (
-            <button
-              className="hero__btn hero__btn--secondary"
-              onClick={onSecondaryClick}
-              aria-label={secondaryText}
-            >
-              {secondaryText}
-            </button>
-          )}
+    <section style={styles.hero}>
+      
+      <div style={styles.container}>
+        
+        <h1 style={styles.heading}>
+          Your Digital Life Deserves a Future
+        </h1>
+
+        <p style={styles.subtext}>
+          Organize your digital assets, protect your accounts,
+          and create a secure digital legacy with the help of AI.
+        </p>
+
+        <div style={styles.buttons}>
+          <button style={styles.primaryBtn} onClick={handleBegin}>
+            Begin Now
+          </button>
+
+          <button style={styles.secondaryBtn} onClick={handleLearn}>
+            Learn More
+          </button>
         </div>
-      </header>
+
+      </div>
+
     </section>
   );
 }
 
-Hero.propTypes = {
-  title: PropTypes.string,
-  subtitle: PropTypes.string,
-  primaryText: PropTypes.string,
-  secondaryText: PropTypes.string,
-  onPrimaryClick: PropTypes.func,
-  onSecondaryClick: PropTypes.func
-};
+const styles = {
+  hero: {
+    minHeight: "90vh",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    textAlign: "center",
+    background: "linear-gradient(135deg,#f9fafc,#eef2ff)"
+  },
 
-Hero.defaultProps = {
-  title: "Your Digital Life Deserves a Future",
-  subtitle:
-    "Organize your digital assets, protect your accounts, and create a secure digital legacy with the help of AI.",
-  primaryText: "Start Planning",
-  secondaryText: "See How It Works",
-  onPrimaryClick: () => {},
-  onSecondaryClick: () => {}
+  container: {
+    maxWidth: "800px",
+    padding: "20px"
+  },
+
+  heading: {
+    fontSize: "3rem",
+    fontWeight: "700",
+    color: "#111827",
+    marginBottom: "20px"
+  },
+
+  subtext: {
+    fontSize: "1.2rem",
+    color: "#6b7280",
+    marginBottom: "30px"
+  },
+
+  buttons: {
+    display: "flex",
+    justifyContent: "center",
+    gap: "20px",
+    flexWrap: "wrap"
+  },
+
+  primaryBtn: {
+    padding: "14px 28px",
+    background: "#4f46e5",
+    color: "white",
+    border: "none",
+    borderRadius: "8px",
+    fontSize: "16px",
+    cursor: "pointer"
+  },
+
+  secondaryBtn: {
+    padding: "14px 28px",
+    border: "1px solid #4f46e5",
+    borderRadius: "8px",
+    background: "white",
+    color: "#4f46e5",
+    fontSize: "16px",
+    cursor: "pointer"
+  }
 };
 
 export default Hero;

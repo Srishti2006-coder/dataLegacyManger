@@ -1,28 +1,30 @@
-
 import Navbar from "../components/Navbar";
 import Hero from "../components/Hero";
 
 function Landing() {
-  const handleGetStarted = () => {
-    console.log("Primary action clicked");
-  };
-
-  const handleLearnMore = () => {
-    console.log("Secondary action clicked");
-  };
-
-  // explicitly pass strings so we know they're rendered
   return (
     <div>
       <Navbar />
-      <Hero
-        title="Welcome to Your Digital Legacy"
-        subtitle="Safeguard memories, passwords and more with a few clicks."
-        primaryText="Begin Now"
-        secondaryText="Learn More"
-        onPrimaryClick={handleGetStarted}
-        onSecondaryClick={handleLearnMore}
-      />
+
+      <Hero />
+
+      {/* Features Section */}
+      <div
+        id="features"
+        style={{
+          padding: "100px",
+          textAlign: "center",
+          background: "#f9fafc"
+        }}
+      >
+        <h2 style={{ fontSize: "2rem", marginBottom: "20px" }}>
+          Powerful Features
+        </h2>
+
+        <p style={{ color: "#6b7280" }}>
+          Secure your digital assets and plan your legacy with AI-powered tools.
+        </p>
+      </div>
     </div>
   );
 }
