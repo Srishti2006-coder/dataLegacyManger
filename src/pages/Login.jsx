@@ -1,84 +1,67 @@
 
-import React from "react";
+import { useState } from "react";
+import { auth } from "../services/firebase";
+import { signInWithEmailAndPassword } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 
 function Login() {
 
   const navigate = useNavigate();
 
-  const handleLogin = () => {
-    // temporary login
-    navigate("/dashboard");
+  const [email,setEmail] = useState("");
+  const [password,setPassword] = useState("");
+
+  const handleLogin = async () => {
+
+    try{
+      await signInWithEmailAndPassword(auth,email,password);
+      alert("Login successful");
+
+      navigate("/dashboard");
+    }
+    catch(error){
+      alert(error.message);
+    }
+
   };
 
   return (
-    <div style={styles.container}>
 
-      <h2 style={styles.title}>Login</h2>
+    <div style={{textAlign:"center", marginTop:"100px"}}>
+
+      <h2>Login</h2>
 
       <input
         type="email"
         placeholder="Email"
-        style={styles.input}
+        onChange={(e)=>setEmail(e.target.value)}
       />
+
+      <br/><br/>
 
       <input
         type="password"
         placeholder="Password"
-        style={styles.input}
+        onChange={(e)=>setPassword(e.target.value)}
       />
 
-      <button style={styles.button} onClick={handleLogin}>
+      <br/><br/>
+
+      <button onClick={handleLogin}>
         Login
       </button>
 
-      <p style={styles.text}>
-        Don't have an account? Sign up
+      <br/><br/>
+
+      {/* Signup link added */}
+      <p>
+        Don't have an account? 
+        <a href="/signup" style={{color:"blue"}}> Signup</a>
       </p>
 
     </div>
+
   );
 }
-
-const styles = {
-
-  container: {
-    height: "100vh",
-    display: "flex",
-    flexDirection: "column",
-    justifyContent: "center",
-    alignItems: "center",
-    background: "#f9fafc"
-  },
-
-  title: {
-    fontSize: "2rem",
-    marginBottom: "30px"
-  },
-
-  input: {
-    width: "280px",
-    padding: "12px",
-    marginBottom: "15px",
-    borderRadius: "6px",
-    border: "1px solid #ccc"
-  },
-
-  button: {
-    width: "280px",
-    padding: "12px",
-    background: "#4f46e5",
-    color: "white",
-    border: "none",
-    borderRadius: "6px",
-    cursor: "pointer"
-  },
-
-  text: {
-    marginTop: "15px",
-    color: "#6b7280"
-  }
-
-};
 
 export default Login;
