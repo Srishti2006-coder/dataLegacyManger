@@ -8,69 +8,90 @@ function Signup(){
 
 const navigate = useNavigate();
 
-const [email,setEmail] = useState("");
-const [password,setPassword] = useState("");
+const [email, setEmail] = useState("");
+const [password, setPassword] = useState("");
+const [loading, setLoading] = useState(false);
+const [error, setError] = useState("");
+const [success, setSuccess] = useState("");
 
 const handleSignup = async () => {
+  if (!email || !password) {
+    setError("Please fill in all fields");
+    return;
+  }
 
-try{
+  if (password.length < 6) {
+    setError("Password must be at least 6 characters");
+    return;
+  }
 
-const userCredential = await createUserWithEmailAndPassword(auth,email,password);
+  setLoading(true);
+  setError("");
+  setSuccess("");
 
-const user = userCredential.user;
+  try {
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
 
-await setDoc(doc(db,"users",user.uid),{
-email:user.email,
-createdAt:serverTimestamp()
-});
+    await setDoc(doc(db, "users", user.uid), {
+      email: user.email,
+      createdAt: serverTimestamp()
+    });
 
-alert("Account created");
-
-navigate("/login");
-
-}
-catch(error){
-alert(error.message);
-}
-
+    setSuccess("Account created successfully!");
+    setTimeout(() => navigate("/login"), 1000);
+  } catch (error) {
+    setError(error.message);
+  } finally {
+    setLoading(false);
+  }
 };
 
 return(
+<div className="auth-container">
+  <div className="auth-card auth-form">
+    <h2 className="auth-title">Create Account</h2>
 
-<div style={{textAlign:"center", marginTop:"100px"}}>
+    <div className="auth-input-group">
+      <input
+        className="auth-input"
+        type="email"
+        placeholder=" "
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+      />
+      <label className="auth-label">Email</label>
+    </div>
 
-<h2>Signup</h2>
+    <div className="auth-input-group">
+      <input
+        className="auth-input"
+        type="password"
+        placeholder=" "
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+      />
+      <label className="auth-label">Password</label>
+    </div>
 
-<input
-type="email"
-placeholder="Email"
-onChange={(e)=>setEmail(e.target.value)}
-/>
+    {error && <div className="auth-error">{error}</div>}
+    {success && <div className="auth-success">{success}</div>}
 
-<br/><br/>
+    <button
+      className="auth-button"
+      onClick={handleSignup}
+      disabled={loading}
+    >
+      {loading && <span className="loading-spinner"></span>}
+      {loading ? "Creating Account..." : "Create Account"}
+    </button>
 
-<input
-type="password"
-placeholder="Password"
-onChange={(e)=>setPassword(e.target.value)}
-/>
-
-<br/><br/>
-
-<button onClick={handleSignup}>
-Create Account
-</button>
-
-<br/><br/>
-
-{/* Login link added */}
-<p>
-Already have an account? 
-<a href="/login" style={{color:"blue"}}> Login</a>
-</p>
-
+    <p>
+      Already have an account?
+      <a href="/login" className="auth-link"> Login</a>
+    </p>
+  </div>
 </div>
-
 );
 
 }

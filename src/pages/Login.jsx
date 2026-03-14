@@ -8,59 +8,78 @@ function Login() {
 
   const navigate = useNavigate();
 
-  const [email,setEmail] = useState("");
-  const [password,setPassword] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   const handleLogin = async () => {
-
-    try{
-      await signInWithEmailAndPassword(auth,email,password);
-      alert("Login successful");
-
-      navigate("/dashboard");
-    }
-    catch(error){
-      alert(error.message);
+    if (!email || !password) {
+      setError("Please fill in all fields");
+      return;
     }
 
+    setLoading(true);
+    setError("");
+    setSuccess("");
+
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      setSuccess("Login successful!");
+      setTimeout(() => navigate("/dashboard"), 1000);
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
+    <div className="auth-container">
+      <div className="auth-card auth-form">
+        <h2 className="auth-title">Welcome Back</h2>
 
-    <div style={{textAlign:"center", marginTop:"100px"}}>
+        <div className="auth-input-group">
+          <input
+            className="auth-input"
+            type="email"
+            placeholder=" "
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+          <label className="auth-label">Email</label>
+        </div>
 
-      <h2>Login</h2>
+        <div className="auth-input-group">
+          <input
+            className="auth-input"
+            type="password"
+            placeholder=" "
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <label className="auth-label">Password</label>
+        </div>
 
-      <input
-        type="email"
-        placeholder="Email"
-        onChange={(e)=>setEmail(e.target.value)}
-      />
+        {error && <div className="auth-error">{error}</div>}
+        {success && <div className="auth-success">{success}</div>}
 
-      <br/><br/>
+        <button
+          className="auth-button"
+          onClick={handleLogin}
+          disabled={loading}
+        >
+          {loading && <span className="loading-spinner"></span>}
+          {loading ? "Logging in..." : "Login"}
+        </button>
 
-      <input
-        type="password"
-        placeholder="Password"
-        onChange={(e)=>setPassword(e.target.value)}
-      />
-
-      <br/><br/>
-
-      <button onClick={handleLogin}>
-        Login
-      </button>
-
-      <br/><br/>
-
-      {/* Signup link added */}
-      <p>
-        Don't have an account? 
-        <a href="/signup" style={{color:"blue"}}> Signup</a>
-      </p>
-
+        <p>
+          Don't have an account?
+          <a href="/signup" className="auth-link"> Sign up</a>
+        </p>
+      </div>
     </div>
-
   );
 }
 
