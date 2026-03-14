@@ -501,6 +501,104 @@ html{
   left: 0;
 }
 
+/* Add Asset Styles */
+.add-asset-container {
+  display: flex;
+  background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+  min-height: 100vh;
+  color: white;
+}
+
+.add-asset-main {
+  margin-left: 260px;
+  padding: 40px;
+  width: 100%;
+}
+
+.add-asset-card {
+  background: linear-gradient(145deg, #1e293b, #334155);
+  border-radius: 20px;
+  padding: 40px;
+  max-width: 600px;
+  margin: 0 auto;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+  border: 1px solid #475569;
+}
+
+.add-asset-title {
+  font-size: 2.5rem;
+  text-align: center;
+  margin-bottom: 10px;
+  color: white;
+  text-shadow: 0 0 20px rgba(99, 102, 241, 0.5);
+}
+
+.add-asset-subtitle {
+  text-align: center;
+  color: #94a3b8;
+  margin-bottom: 40px;
+}
+
+.add-asset-form-group {
+  margin-bottom: 25px;
+}
+
+.add-asset-label {
+  display: block;
+  margin-bottom: 8px;
+  color: #cbd5e1;
+  font-weight: 500;
+}
+
+.add-asset-input, .add-asset-textarea, .add-asset-select {
+  width: 100%;
+  padding: 15px;
+  border: 2px solid #475569;
+  border-radius: 10px;
+  background: #1a1a2e;
+  color: white;
+  font-size: 16px;
+  transition: border-color 0.3s ease;
+}
+
+.add-asset-input:focus, .add-asset-textarea:focus, .add-asset-select:focus {
+  outline: none;
+  border-color: #6366f1;
+  box-shadow: 0 0 10px rgba(99, 102, 241, 0.3);
+}
+
+.add-asset-input::placeholder, .add-asset-textarea::placeholder {
+  color: #94a3b8;
+}
+
+.add-asset-textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.add-asset-button {
+  width: 100%;
+  padding: 15px;
+  background: linear-gradient(45deg, #6366f1, #8b5cf6);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+  margin-top: 20px;
+}
+
+.add-asset-button:hover {
+  transform: scale(1.02);
+}
+
+.add-asset-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
 /* Sidebar Styles */
 .sidebar-container {
   width: 240px;

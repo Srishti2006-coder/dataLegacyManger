@@ -4,123 +4,125 @@ import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../layout/Sidebar";
 
-function AddAsset(){
+function AddAsset() {
+  const navigate = useNavigate();
+  const [title, setTitle] = useState("");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [category, setCategory] = useState("password");
+  const [notes, setNotes] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-const navigate = useNavigate();
+  const handleAddAsset = async () => {
+    if (!title || !username) {
+      setError("Please fill in at least title and username");
+      return;
+    }
 
-const [title,setTitle] = useState("");
-const [username,setUsername] = useState("");
-const [password,setPassword] = useState("");
-const [notes,setNotes] = useState("");
+    setLoading(true);
+    setError("");
 
-const handleAddAsset = async () => {
+    try {
+      await addDoc(collection(db, "assets"), {
+        userId: auth.currentUser.uid,
+        title: title,
+        username: username,
+        password: password,
+        category: category,
+        notes: notes,
+        createdAt: serverTimestamp()
+      });
 
-try{
+      alert("Asset saved successfully");
+      navigate("/view-assets");
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-await addDoc(collection(db,"assets"),{
+  return (
+    <div className="add-asset-container">
+      <Sidebar />
 
-userId: auth.currentUser.uid,
-title:title,
-username:username,
-password:password,
-notes:notes,
-createdAt:serverTimestamp()
+      <div className="add-asset-main">
+        <div className="add-asset-card">
+          <h1 className="add-asset-title">Add Digital Asset</h1>
+          <p className="add-asset-subtitle">Securely store your digital credentials and important information</p>
 
-});
+          <div className="add-asset-form-group">
+            <label className="add-asset-label">Asset Title *</label>
+            <input
+              className="add-asset-input"
+              type="text"
+              placeholder="e.g., Gmail Account, Bank Login"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+            />
+          </div>
 
-alert("Asset saved successfully");
+          <div className="add-asset-form-group">
+            <label className="add-asset-label">Category</label>
+            <select
+              className="add-asset-select"
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+            >
+              <option value="password">Password/Credentials</option>
+              <option value="financial">Financial</option>
+              <option value="personal">Personal Documents</option>
+              <option value="social">Social Media</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
 
-navigate("/view-assets");
+          <div className="add-asset-form-group">
+            <label className="add-asset-label">Username / Email *</label>
+            <input
+              className="add-asset-input"
+              type="text"
+              placeholder="Enter username or email"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+            />
+          </div>
 
+          <div className="add-asset-form-group">
+            <label className="add-asset-label">Password</label>
+            <input
+              className="add-asset-input"
+              type="password"
+              placeholder="Enter password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </div>
+
+          <div className="add-asset-form-group">
+            <label className="add-asset-label">Notes</label>
+            <textarea
+              className="add-asset-textarea"
+              placeholder="Additional notes or instructions"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+            />
+          </div>
+
+          {error && <p style={{ color: "#ef4444", marginBottom: "20px" }}>{error}</p>}
+
+          <button
+            className="add-asset-button"
+            onClick={handleAddAsset}
+            disabled={loading}
+          >
+            {loading ? "Saving..." : "Save Asset"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 }
-catch(error){
-alert(error.message);
-}
-
-};
-
-return(
-
-<div style={styles.container}>
-
-<Sidebar/>
-
-<div style={styles.main}>
-
-<h2>Add Digital Asset</h2>
-
-<input
-style={styles.input}
-placeholder="Asset Title"
-onChange={(e)=>setTitle(e.target.value)}
-/>
-
-<input
-style={styles.input}
-placeholder="Username / Email"
-onChange={(e)=>setUsername(e.target.value)}
-/>
-
-<input
-style={styles.input}
-placeholder="Password"
-onChange={(e)=>setPassword(e.target.value)}
-/>
-
-<textarea
-style={styles.input}
-placeholder="Notes"
-onChange={(e)=>setNotes(e.target.value)}
-/>
-
-<button
-style={styles.button}
-onClick={handleAddAsset}
->
-Save Asset
-</button>
-
-</div>
-
-</div>
-
-);
-
-}
-
-const styles={
-
-container:{
-display:"flex",
-background:"#020617",
-minHeight:"100vh",
-color:"white"
-},
-
-main:{
-marginLeft:"220px",
-padding:"40px",
-width:"100%"
-},
-
-input:{
-display:"block",
-margin:"15px 0",
-padding:"12px",
-width:"300px",
-borderRadius:"8px",
-border:"none"
-},
-
-button:{
-padding:"12px 20px",
-background:"#6366f1",
-border:"none",
-borderRadius:"8px",
-color:"white",
-cursor:"pointer"
-}
-
-};
 
 export default AddAsset;
