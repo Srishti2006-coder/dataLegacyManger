@@ -1,117 +1,124 @@
 
-import { auth } from "../services/firebase";
-import { signOut } from "firebase/auth";
+import Sidebar from "../layout/Sidebar";
+import { auth, db } from "../services/firebase";
 import { useNavigate } from "react-router-dom";
+import { signOut } from "firebase/auth";
+import { useState, useEffect } from "react";
+import { collection, query, where, onSnapshot } from "firebase/firestore";
 
 function Dashboard() {
 
   const navigate = useNavigate();
-
   const user = auth.currentUser;
+  const [totalAssets, setTotalAssets] = useState(0);
+  const [totalNominees, setTotalNominees] = useState(0);
+
+  useEffect(() => {
+    if (user) {
+      const q = query(collection(db, "assets"), where("userId", "==", user.uid));
+      const unsubscribe = onSnapshot(q, (querySnapshot) => {
+        setTotalAssets(querySnapshot.size);
+      });
+
+      return unsubscribe; // Cleanup on unmount
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (user) {
+      const q = query(collection(db, "nominees"), where("userId", "==", user.uid));
+      const unsubscribe = onSnapshot(q, (querySnapshot) => {
+        setTotalNominees(querySnapshot.size);
+      });
+
+      return unsubscribe; // Cleanup on unmount
+    }
+  }, [user]);
 
   const handleLogout = async () => {
-
     await signOut(auth);
-
     navigate("/login");
-
   };
 
   return (
 
-    <div style={styles.container}>
+    <div style={{ display: "flex", background: "#020617", minHeight: "100vh" }}>
 
-      <h1 style={styles.heading}>LegacyAI Dashboard</h1>
+      {/* Sidebar */}
+      <Sidebar />
 
-      <p style={styles.email}>
-        Welcome {user?.email}
-      </p>
+      {/* Main Content */}
+      <div style={{ marginLeft: "260px", padding: "40px", color: "white", width: "100%" }}>
 
-      <div style={styles.grid}>
+        <div className="dashboard-header">
+          <div>
+            <h1 className="dashboard-title">Dashboard</h1>
+            <p className="dashboard-user">Welcome {user?.email}</p>
+          </div>
+          <button className="logout-btn" onClick={handleLogout}>
+            Logout
+          </button>
+        </div>
 
-        <button
-          style={styles.card}
-          onClick={()=>navigate("/add-asset")}
-        >
-          Add Asset
-        </button>
+        <div className="dashboard-grid">
 
-        <button
-          style={styles.card}
-          onClick={()=>navigate("/view-assets")}
-        >
-          View Assets
-        </button>
+          <div
+            className="dashboard-card"
+            onClick={() => navigate("/add-asset")}
+          >
+            <h3>Add Asset</h3>
+            <p>Store your digital credentials securely</p>
+          </div>
 
-        <button
-          style={styles.card}
-          onClick={()=>navigate("/nominee")}
-        >
-          Set Nominee
-        </button>
+          <div
+            className="dashboard-card"
+            onClick={() => navigate("/view-assets")}
+          >
+            <h3>View Assets</h3>
+            <p>Access your saved digital assets</p>
+          </div>
+
+          <div
+            className="dashboard-card"
+            onClick={() => navigate("/nominee")}
+          >
+            <h3>Set Nominee</h3>
+            <p>Assign trusted person for access</p>
+          </div>
+
+        </div>
+
+        <div className="dashboard-stats">
+          <div className="stat-card">
+            <div className="stat-number">{totalAssets}</div>
+            <div className="stat-label">Total Assets</div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-number">3</div>
+            <div className="stat-label">Categories</div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-number">{totalNominees}</div>
+            <div className="stat-label">Nominees Set</div>
+          </div>
+        </div>
+
+        <div className="dashboard-tips">
+          <h3>Quick Tips to Get Started</h3>
+          <ul>
+            <li>Start by adding your most important digital assets like passwords and accounts.</li>
+            <li>Set up a nominee to ensure your digital legacy is properly managed.</li>
+            <li>Regularly review and update your stored information for security.</li>
+            <li>Use strong, unique passwords for all your accounts.</li>
+            <li>Consider enabling two-factor authentication wherever possible.</li>
+          </ul>
+        </div>
 
       </div>
-
-      <button
-        style={styles.logout}
-        onClick={handleLogout}
-      >
-        Logout
-      </button>
 
     </div>
 
   );
 }
-
-const styles = {
-
-container:{
-minHeight:"100vh",
-background:"#020617",
-color:"white",
-textAlign:"center",
-paddingTop:"80px"
-},
-
-heading:{
-fontSize:"2.5rem",
-marginBottom:"10px"
-},
-
-email:{
-color:"#94a3b8",
-marginBottom:"40px"
-},
-
-grid:{
-display:"flex",
-justifyContent:"center",
-gap:"30px",
-flexWrap:"wrap"
-},
-
-card:{
-padding:"30px",
-width:"180px",
-background:"#1e293b",
-border:"1px solid #334155",
-borderRadius:"12px",
-color:"white",
-fontSize:"16px",
-cursor:"pointer"
-},
-
-logout:{
-marginTop:"50px",
-padding:"12px 25px",
-background:"#ef4444",
-border:"none",
-borderRadius:"8px",
-color:"white",
-cursor:"pointer"
-}
-
-};
 
 export default Dashboard;

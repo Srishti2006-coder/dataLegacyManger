@@ -1,51 +1,43 @@
 
-import React from "react";
+import { useNavigate } from "react-router-dom";
 
 function Sidebar() {
-  return (
-    <div style={styles.sidebar}>
-      
-      <h2 style={styles.logo}>
-        Legacy<span style={styles.ai}>AI</span>
-      </h2>
 
-      <ul style={styles.menu}>
-        <li>Dashboard</li>
-        <li>Vault</li>
-        <li>Digital Will</li>
-      </ul>
+  const navigate = useNavigate();
+
+  return (
+
+    <div className="sidebar-container">
+
+      <h2 className="sidebar-logo">LegacyAI</h2>
+
+      <button className="sidebar-link" onClick={() => navigate("/dashboard")}>
+        Dashboard
+      </button>
+
+      <button className="sidebar-link" onClick={() => navigate("/add-asset")}>
+        Add Asset
+      </button>
+
+      <button className="sidebar-link" onClick={() => navigate("/view-assets")}>
+        View Assets
+      </button>
+
+      <button className="sidebar-link" onClick={() => navigate("/nominee")}>
+        Nominee
+      </button>
+
+      <button className="sidebar-link" onClick={() => navigate("/profile")}>
+        Profile
+      </button>
+
+      <button className="sidebar-link" onClick={() => navigate("/settings")}>
+        Settings
+      </button>
 
     </div>
+
   );
 }
-
-const styles = {
-
-  sidebar: {
-    width: "220px",
-    height: "100vh",
-    background: "#111827",
-    color: "white",
-    padding: "30px 20px",
-    position: "fixed"
-  },
-
-  logo: {
-    marginBottom: "40px"
-  },
-
-  ai: {
-    color: "#6366f1"
-  },
-
-  menu: {
-    listStyle: "none",
-    display: "flex",
-    flexDirection: "column",
-    gap: "20px",
-    cursor: "pointer"
-  }
-
-};
 
 export default Sidebar;
