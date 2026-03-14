@@ -13,6 +13,7 @@ function Login() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -52,14 +53,23 @@ function Login() {
         </div>
 
         <div className="auth-input-group">
-          <input
-            className="auth-input"
-            type="password"
-            placeholder=" "
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-          <label className="auth-label">Password</label>
+          <div className="password-input-container">
+            <input
+              className="auth-input"
+              type={showPassword ? "text" : "password"}
+              placeholder=" "
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            <label className="auth-label">Password</label>
+            <button
+              type="button"
+              className="password-toggle"
+              onClick={() => setShowPassword(!showPassword)}
+            >
+              {showPassword ? "🙈" : "👁️"}
+            </button>
+          </div>
         </div>
 
         {error && <div className="auth-error">{error}</div>}
