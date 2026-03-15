@@ -12,6 +12,8 @@ import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
 import Vault from "./pages/Vault";
 import Will from "./pages/Will";
+import NomineeVerify from "./pages/NomineeVerify";
+import EmergencyAccess from "./pages/EmergencyAccess";
 
 function App() {
 
@@ -42,6 +44,8 @@ return(
 <Route path="/vault" element={<Vault />} />
 
 <Route path="/will" element={<Will />} />
+        <Route path="/nominee-verify" element={<NomineeVerify />} />
+        <Route path="/emergency-access" element={<EmergencyAccess />} />
 
 </Routes>
 

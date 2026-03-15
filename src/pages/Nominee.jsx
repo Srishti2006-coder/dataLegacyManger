@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { auth, db } from "../services/firebase";
 import { collection, addDoc, getDocs, deleteDoc, doc, query, where, updateDoc } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
@@ -7,28 +7,58 @@ function Nominee() {
   const navigate = useNavigate();
   const user = auth.currentUser;
   const [nominees, setNominees] = useState([]);
-  const [formData, setFormData] = useState({
+  const [assets, setAssets] = useState([]);
+const [formData, setFormData] = useState({
     name: "",
     email: "",
     relationship: "",
-    phone: ""
+    phone: "",
+    verified: false, // New: verification status
+    verificationSent: false,
+    assignedAssets: []
   });
   const [editingId, setEditingId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  useEffect(() => {
-    if (user) {
-      fetchNominees();
+  const fetchNominees = useCallback(async () => {
+    try {
+      const q = query(collection(db, "nominees"), where("userId", "==", user.uid));
+      const querySnapshot = await getDocs(q);
+      const nomineesData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setNominees(nomineesData);
+    } catch (error) {
+      console.error("Error fetching nominees:", error);
+      setError("Failed to load nominees. Please try again.");
     }
   }, [user]);
 
-  const fetchNominees = async () => {
-    const q = query(collection(db, "nominees"), where("userId", "==", user.uid));
-    const querySnapshot = await getDocs(q);
-    const nomineesData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    setNominees(nomineesData);
+  const fetchAssets = useCallback(async () => {
+    try {
+      const q = query(collection(db, "assets"), where("userId", "==", user.uid));
+      const querySnapshot = await getDocs(q);
+      const assetsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setAssets(assetsData);
+    } catch (error) {
+      console.error("Error fetching assets:", error);
+      setError("Failed to load assets. Please try again.");
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (user) {
+      fetchNominees();
+      fetchAssets();
+    }
+  }, [user, fetchNominees, fetchAssets]); // user is the only external dependency
+
+  const getNomineeAssets = (nomineeId) => {
+    const nominee = nominees.find(n => n.id === nomineeId);
+    if (!nominee || !nominee.assignedAssets || !Array.isArray(nominee.assignedAssets)) {
+      return [];
+    }
+    return assets.filter(asset => nominee.assignedAssets.includes(asset.id));
   };
 
   const handleInputChange = (e) => {
@@ -40,7 +70,7 @@ function Nominee() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.name || !formData.email || !formData.relationship) {
+if (!formData.name || !formData.relationship) {
       setError("Please fill in all required fields");
       return;
     }
@@ -67,7 +97,7 @@ function Nominee() {
         });
         setSuccess("Nominee added successfully!");
       }
-      setFormData({ name: "", email: "", relationship: "", phone: "" });
+      setFormData({ name: "", email: "", relationship: "", phone: "", assignedAssets: [] });
       fetchNominees();
     } catch (error) {
       setError(error.message);
@@ -81,7 +111,10 @@ function Nominee() {
       name: nominee.name,
       email: nominee.email,
       relationship: nominee.relationship,
-      phone: nominee.phone || ""
+      phone: nominee.phone || "",
+      verified: nominee.verified || false,
+      verificationSent: nominee.verificationSent || false,
+      assignedAssets: nominee.assignedAssets || []
     });
     setEditingId(nominee.id);
     setError("");
@@ -89,7 +122,7 @@ function Nominee() {
   };
 
   const handleCancelEdit = () => {
-    setFormData({ name: "", email: "", relationship: "", phone: "" });
+    setFormData({ name: "", email: "", relationship: "", phone: "", assignedAssets: [] });
     setEditingId(null);
     setError("");
   };
@@ -141,15 +174,14 @@ function Nominee() {
                   />
                 </div>
                 <div style={{ marginBottom: "20px" }}>
-                  <label style={{ display: "block", marginBottom: "5px", color: "#cbd5e1", fontWeight: "500" }}>Email Address *</label>
+                  <label style={{ display: "block", marginBottom: "5px", color: "#cbd5e1", fontWeight: "500" }}>Email Address</label>
                   <input
                     type="email"
                     name="email"
-                    placeholder="Enter email address"
+                    placeholder="Enter email address (optional)"
                     value={formData.email}
                     onChange={handleInputChange}
                     style={{ width: "100%", padding: "12px", borderRadius: "8px", border: "2px solid #475569", background: "#1a1a2e", color: "white", fontSize: "16px", transition: "border-color 0.3s ease" }}
-                    required
                   />
                 </div>
                 <div style={{ marginBottom: "20px" }}>
@@ -164,7 +196,7 @@ function Nominee() {
                     required
                   />
                 </div>
-                <div style={{ marginBottom: "20px" }}>
+    <div style={{ marginBottom: "20px" }}>
                   <label style={{ display: "block", marginBottom: "5px", color: "#cbd5e1", fontWeight: "500" }}>Phone Number</label>
                   <input
                     type="tel"
@@ -175,7 +207,50 @@ function Nominee() {
                     style={{ width: "100%", padding: "12px", borderRadius: "8px", border: "2px solid #475569", background: "#1a1a2e", color: "white", fontSize: "16px", transition: "border-color 0.3s ease" }}
                   />
                 </div>
-                {error && <p style={{ color: "#ef4444", marginBottom: "15px", fontSize: "14px" }}>{error}</p>}
+                <div style={{ marginBottom: "20px" }}>
+                  <label style={{ display: "block", marginBottom: "5px", color: "#cbd5e1", fontWeight: "500" }}>Verified</label>
+                  <input
+                    type="checkbox"
+                    name="verified"
+                    checked={formData.verified}
+                    onChange={(e) => setFormData({...formData, verified: e.target.checked})}
+                    style={{ width: "20px", height: "20px", accentColor: "#10b981", marginTop: "5px" }}
+                  />
+                </div>
+                <div style={{ marginBottom: "20px" }}>
+                  <label style={{ display: "block", marginBottom: "10px", color: "#cbd5e1", fontWeight: "500" }}>Assign Assets</label>
+                  <div style={{ maxHeight: "200px", overflowY: "auto", padding: "10px", background: "#1a1a2e", borderRadius: "8px", border: "1px solid #475569" }}>
+                    {assets.length === 0 ? (
+                      <p style={{ color: "#94a3b8", fontSize: "0.9rem", textAlign: "center", margin: "20px 0" }}>No assets available. Add assets first to assign them to nominees.</p>
+                    ) : (
+                      assets.map((asset) => (
+                        <div key={asset.id} style={{ display: "flex", alignItems: "center", marginBottom: "8px" }}>
+                          <input
+                            type="checkbox"
+                            id={`asset-${asset.id}`}
+                            checked={formData.assignedAssets.includes(asset.id)}
+                            onChange={(e) => {
+                              const assetId = asset.id;
+                              setFormData(prev => ({
+                                ...prev,
+                                assignedAssets: e.target.checked
+                                  ? [...prev.assignedAssets, assetId]
+                                  : prev.assignedAssets.filter(id => id !== assetId)
+                              }));
+                            }}
+                            style={{ marginRight: "10px", accentColor: "#6366f1" }}
+                          />
+                          <label htmlFor={`asset-${asset.id}`} style={{ color: "#cbd5e1", fontSize: "0.9rem", cursor: "pointer" }}>
+                            <strong>{asset.title}</strong> ({asset.category}) - {asset.notes || 'No description'}
+                          </label>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                  <p style={{ color: "#6b7280", fontSize: "0.8rem", marginTop: "5px" }}>
+                    Select the assets this nominee should have access to. You can change this later.
+                  </p>
+                </div>
                 {success && <p style={{ color: "#10b981", marginBottom: "15px", fontSize: "14px" }}>{success}</p>}
                 <div style={{ display: "flex", gap: "10px" }}>
                   <button
@@ -212,19 +287,90 @@ function Nominee() {
                   {nominees.map((nominee) => (
                     <div key={nominee.id} style={{ background: "#2a2a3e", padding: "20px", borderRadius: "12px", marginBottom: "15px", border: "1px solid #475569", position: "relative" }}>
                       <h4 style={{ margin: "0 0 8px 0", color: "white", fontSize: "1.2rem" }}>{nominee.name}</h4>
-                      <p style={{ margin: "0 0 5px 0", color: "#94a3b8", fontSize: "0.9rem" }}>📧 {nominee.email}</p>
+                      {nominee.email && <p style={{ margin: "0 0 5px 0", color: "#94a3b8", fontSize: "0.9rem" }}>📧 {nominee.email}</p>}
                       <p style={{ margin: "0 0 5px 0", color: "#94a3b8", fontSize: "0.9rem" }}>👨‍👩‍👧‍👦 {nominee.relationship}</p>
                       {nominee.phone && <p style={{ margin: "0 0 15px 0", color: "#94a3b8", fontSize: "0.9rem" }}>📞 {nominee.phone}</p>}
-                      <div style={{ display: "flex", gap: "10px" }}>
+                      <div style={{ display: "flex", alignItems: "center", marginBottom: "15px" }}>
+                        <span style={{ color: nominee.verified ? "#10b981" : "#ef4444", fontSize: "1.2rem", marginRight: "8px" }}>
+                          {nominee.verified ? "✅" : "❌"}
+                        </span>
+                        <span style={{ fontWeight: "500" }}>
+                          {nominee.verified ? "Verified" : "Not Verified"}
+                          {nominee.verificationSent && !nominee.verified && " (Email Sent)"}
+                        </span>
+                      </div>
+                      <div style={{ marginBottom: "15px", padding: "10px", background: "#1a1a2e", borderRadius: "8px" }}>
+                        <p style={{ fontWeight: "bold", color: "#6366f1", marginBottom: "8px", fontSize: "0.9rem" }}>
+                          📁 Assigned Assets ({getNomineeAssets(nominee.id).length})
+                        </p>
+                        {getNomineeAssets(nominee.id).length === 0 ? (
+                          <p style={{ color: "#94a3b8", fontSize: "0.8rem" }}>No assets assigned yet</p>
+                        ) : (
+                          <div style={{ display: "flex", flexWrap: "wrap", gap: "5px" }}>
+                            {getNomineeAssets(nominee.id).map((asset) => (
+                              <span key={asset.id} style={{
+                                background: "#475569",
+                                padding: "4px 8px",
+                                borderRadius: "12px",
+                                fontSize: "0.8rem",
+                                color: "#e2e8f0"
+                              }}>
+                                {asset.title}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                      <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
                         <button
                           onClick={() => handleEdit(nominee)}
                           style={{ padding: "8px 15px", background: "#f59e0b", color: "white", border: "none", borderRadius: "6px", cursor: "pointer", fontSize: "14px", transition: "background 0.3s ease" }}
                         >
                           ✏️ Edit
                         </button>
+                        {!nominee.verified && (
+                          <button
+                            onClick={async () => {
+                              try {
+                                await updateDoc(doc(db, "nominees", nominee.id), {
+                                  verificationSent: true,
+                                  verificationSentAt: new Date()
+                                });
+                                setSuccess("Verification email sent!");
+                                fetchNominees();
+                              } catch (error) {
+                                setError("Failed to send verification: " + error.message);
+                              }
+                            }}
+                            style={{ padding: "8px 15px", background: "#3b82f6", color: "white", border: "none", borderRadius: "6px", cursor: "pointer", fontSize: "14px", transition: "background 0.3s ease" }}
+                          >
+                            📧 Send Verification
+                          </button>
+                        )}
+                        <button
+                          onClick={async () => {
+                            try {
+                              await addDoc(collection(db, "accessRequests"), {
+                                nomineeId: nominee.id,
+                                nomineeName: nominee.name,
+                                nomineeEmail: nominee.email,
+                                userId: user.uid,
+                                status: "pending",
+                                requestedAt: new Date(),
+                                requestedByNominee: true
+                              });
+                              setSuccess("Emergency access requested! Check your notifications.");
+                            } catch (error) {
+                              setError("Failed to request access: " + error.message);
+                            }
+                          }}
+                          style={{ padding: "8px 15px", background: "#ef4444", color: "white", border: "none", borderRadius: "6px", cursor: "pointer", fontSize: "14px", transition: "background 0.3s ease" }}
+                        >
+                          🚨 Request Emergency Access
+                        </button>
                         <button
                           onClick={() => handleDelete(nominee.id)}
-                          style={{ padding: "8px 15px", background: "#ef4444", color: "white", border: "none", borderRadius: "6px", cursor: "pointer", fontSize: "14px", transition: "background 0.3s ease" }}
+                          style={{ padding: "8px 15px", background: "#6b7280", color: "white", border: "none", borderRadius: "6px", cursor: "pointer", fontSize: "14px", transition: "background 0.3s ease" }}
                         >
                           🗑️ Delete
                         </button>

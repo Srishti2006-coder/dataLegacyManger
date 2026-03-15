@@ -17,7 +17,11 @@ function Dashboard() {
     if (user) {
       const q = query(collection(db, "assets"), where("userId", "==", user.uid));
       const unsubscribe = onSnapshot(q, (querySnapshot) => {
-        setTotalAssets(querySnapshot.size);
+        try {
+          setTotalAssets(querySnapshot.size);
+        } catch (error) {
+          console.error("Error updating assets count:", error);
+        }
       });
 
       return unsubscribe; // Cleanup on unmount
@@ -28,7 +32,11 @@ function Dashboard() {
     if (user) {
       const q = query(collection(db, "nominees"), where("userId", "==", user.uid));
       const unsubscribe = onSnapshot(q, (querySnapshot) => {
-        setTotalNominees(querySnapshot.size);
+        try {
+          setTotalNominees(querySnapshot.size);
+        } catch (error) {
+          console.error("Error updating nominees count:", error);
+        }
       });
 
       return unsubscribe; // Cleanup on unmount
