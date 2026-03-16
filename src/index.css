@@ -688,6 +688,43 @@ html{
   font-size: 14px;
 }
 
+/* Custom Category Input - matches form inputs */
+.custom-category-input {
+  width: 100%;
+  padding: 15px;
+  border: 2px solid #475569;
+  border-radius: 10px;
+  background: #1a1a2e;
+  color: white;
+  font-size: 16px;
+  transition: border-color 0.3s ease;
+  margin-top: 10px;
+}
+
+.custom-category-input:focus {
+  outline: none;
+  border-color: #6366f1;
+  box-shadow: 0 0 10px rgba(99, 102, 241, 0.3);
+}
+
+.custom-category-input::placeholder {
+  color: #94a3b8;
+}
+
+/* AI Scanner Preview */
+.ai-preview {
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid #10b981;
+  border-radius: 8px;
+  padding: 15px;
+  margin-top: 10px;
+  font-size: 14px;
+}
+
+.ai-preview strong {
+  color: #10b981;
+}
+
 /* Sidebar Styles */
 .sidebar-container {
   width: 240px;

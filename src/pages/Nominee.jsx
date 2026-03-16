@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { auth, db } from "../services/firebase";
+import { auth, db, sendNomineeVerificationEmail } from "../services/firebase";
 import { collection, addDoc, getDocs, deleteDoc, doc, query, where, updateDoc } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 
@@ -332,19 +332,30 @@ if (!formData.name || !formData.relationship) {
                           <button
                             onClick={async () => {
                               try {
-                                await updateDoc(doc(db, "nominees", nominee.id), {
-                                  verificationSent: true,
-                                  verificationSentAt: new Date()
-                                });
-                                setSuccess("Verification email sent!");
+                                setError("");
+                                setSuccess("");
+                                const result = await sendNomineeVerificationEmail({ nomineeId: nominee.id });
+                                setSuccess(result.data.message || "Verification email sent!");
                                 fetchNominees();
                               } catch (error) {
-                                setError("Failed to send verification: " + error.message);
+                                console.error("Send verification error:", error);
+                                setError(error.message || "Failed to send verification email.");
                               }
                             }}
-                            style={{ padding: "8px 15px", background: "#3b82f6", color: "white", border: "none", borderRadius: "6px", cursor: "pointer", fontSize: "14px", transition: "background 0.3s ease" }}
+                            disabled={nominee.verificationSent}
+                            style={{ 
+                              padding: "8px 15px", 
+                              background: nominee.verificationSent ? "#6b7280" : "#3b82f6", 
+                              color: "white", 
+                              border: "none", 
+                              borderRadius: "6px", 
+                              cursor: nominee.verificationSent ? "not-allowed" : "pointer", 
+                              fontSize: "14px", 
+                              transition: "all 0.3s ease",
+                              opacity: nominee.verificationSent ? 0.6 : 1
+                            }}
                           >
-                            📧 Send Verification
+                            📧 {nominee.verificationSent ? "Email Sent" : "Send Verification"}
                           </button>
                         )}
                         <button

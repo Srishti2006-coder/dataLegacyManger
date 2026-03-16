@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { auth, db } from "../services/firebase";
 import { encryptField } from "../services/encryption";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
@@ -10,447 +10,247 @@ function AddAsset() {
   const navigate = useNavigate();
 
   const [title, setTitle] = useState("");
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+  const [rawData, setRawData] = useState("");
+  const [fields, setFields] = useState([
+    { name: "Identifier", value: "" },
+    { name: "Password/Security Info", value: "" },
+    { name: "Notes", value: "" }
+  ]);
   const [category, setCategory] = useState("password");
-  const [notes, setNotes] = useState("");
-  const [rawData, setRawData] = useState(""); // AI Scanner raw paste
-  const [showAdvanced, setShowAdvanced] = useState(false); // Toggle scanner
-
+  const [customCategoryInput, setCustomCategoryInput] = useState("");
+  const [isCustomMode, setIsCustomMode] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  const [scanPreview, setScanPreview] = useState("");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [isHovering, setIsHovering] = useState(false); // Fix hover
+  const [isHovering, setIsHovering] = useState(false);
 
   const dropdownRef = useRef(null);
 
-const categories = [
-{ value: "password", label: "Password/Credentials", icon: "🔐" },
-{ value: "email", label: "Email Accounts", icon: "📧" },
-{ value: "financial", label: "Banking & Finance", icon: "🏦" },
-{ value: "crypto", label: "Cryptocurrency & Wallets", icon: "₿" },
-{ value: "social", label: "Social Media", icon: "📱" },
-{ value: "cloud", label: "Cloud Storage", icon: "☁️" },
-{ value: "streaming", label: "Streaming Services", icon: "🎬" },
-{ value: "shopping", label: "Shopping & Retail", icon: "🛒" },
-{ value: "professional", label: "Professional & Work", icon: "💼" },
-{ value: "health", label: "Health & Medical", icon: "🏥" },
-{ value: "government", label: "Government & Tax", icon: "🏛️" },
-{ value: "gaming", label: "Gaming Accounts", icon: "🎮" },
-{ value: "communication", label: "Communication", icon: "💬" },
-{ value: "security", label: "Security & 2FA", icon: "🛡️" },
-{ value: "insurance", label: "Insurance", icon: "📋" },
-{ value: "real-estate", label: "Real Estate", icon: "🏠" },
-{ value: "education", label: "Education", icon: "🎓" },
-{ value: "travel", label: "Travel & Loyalty", icon: "✈️" },
-{ value: "utilities", label: "Utilities", icon: "⚡" },
-{ value: "subscriptions", label: "Subscriptions", icon: "📺" },
-{ value: "personal", label: "Personal Documents", icon: "📄" },
-{ value: "other", label: "Other", icon: "📦" }
-];
+  const categories = [
+    { value: "password", label: "Password/Credentials", icon: "🔐" },
+    { value: "email", label: "Email Accounts", icon: "📧" },
+    { value: "financial", label: "Banking & Finance", icon: "🏦" },
+    { value: "crypto", label: "Cryptocurrency & Wallets", icon: "₿" },
+    { value: "social", label: "Social Media", icon: "📱" },
+    { value: "cloud", label: "Cloud Storage", icon: "☁️" },
+    { value: "streaming", label: "Streaming Services", icon: "🎬" },
+    { value: "shopping", label: "Shopping & Retail", icon: "🛒" },
+    { value: "professional", label: "Professional & Work", icon: "💼" },
+    { value: "health", label: "Health & Medical", icon: "🏥" },
+    { value: "government", label: "Government & Tax", icon: "🏛️" },
+    { value: "gaming", label: "Gaming Accounts", icon: "🎮" },
+    { value: "communication", label: "Communication", icon: "💬" },
+    { value: "security", label: "Security & 2FA", icon: "🛡️" },
+    { value: "insurance", label: "Insurance", icon: "📋" },
+    { value: "real-estate", label: "Real Estate", icon: "🏠" },
+    { value: "education", label: "Education", icon: "🎓" },
+    { value: "travel", label: "Travel & Loyalty", icon: "✈️" },
+    { value: "utilities", label: "Utilities", icon: "⚡" },
+    { value: "subscriptions", label: "Subscriptions", icon: "📺" },
+    { value: "personal", label: "Personal Documents", icon: "📄" },
+    { value: "other", label: "Other", icon: "📦" },
+    { value: "custom", label: "Custom Category...", icon: "✏️" }
+  ];
 
-const selectedCategory = categories.find(cat => cat.value === category) || categories[0];
+  const selectedCategory = categories.find(c => c.value === category) || categories[0];
 
-const styles = {
-  container: {
-    display: "flex",
-    background: "linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%)",
-    minHeight: "100vh",
-    color: "white"
-  },
-  main: {
-    marginLeft: "260px",
-    padding: "40px",
-    width: "100%"
-  },
-  header: {
-    textAlign: "center",
-    marginBottom: "40px"
-  },
-  title: {
-    fontSize: "2.5rem",
-    marginBottom: "10px",
-    textShadow: "0 0 20px rgba(99, 102, 241, 0.5)"
-  },
-  subtitle: {
-    color: "#94a3b8",
-    fontSize: "1.1rem"
-  },
-  formCard: {
-    maxWidth: "800px",
-    margin: "0 auto",
-    background: "linear-gradient(145deg, #1e293b, #334155)",
-    borderRadius: "20px",
-    padding: "40px",
-    border: "1px solid #475569",
-    boxShadow: "0 20px 40px rgba(0,0,0,0.3)"
-  },
-  formTitle: {
-    textAlign: "center",
-    marginBottom: "30px",
-    color: "white",
-    fontSize: "1.8rem"
-  },
-  formGroup: {
-    marginBottom: "25px"
-  },
-  label: {
-    display: "block",
-    marginBottom: "8px",
-    color: "#cbd5e1",
-    fontWeight: "500",
-    fontSize: "1rem"
-  },
-  input: {
-    width: "100%",
-    padding: "15px",
-    borderRadius: "10px",
-    border: "2px solid #475569",
-    background: "#1a1a2e",
-    color: "white",
-    fontSize: "16px",
-    transition: "border-color 0.3s ease",
-    outline: "none"
-  },
-  textarea: {
-    width: "100%",
-    padding: "15px",
-    borderRadius: "10px",
-    border: "2px solid #475569",
-    background: "#1a1a2e",
-    color: "white",
-    fontSize: "16px",
-    minHeight: "100px",
-    resize: "vertical",
-    transition: "border-color 0.3s ease",
-    outline: "none"
-  },
-  dropdownContainer: {
-    position: "relative",
-    marginBottom: "25px"
-  },
-  dropdownButton: {
-    width: "100%",
-    padding: "15px",
-    borderRadius: "10px",
-    border: "2px solid #475569",
-    background: "#1a1a2e",
-    color: "white",
-    fontSize: "16px",
-    textAlign: "left",
-    cursor: "pointer",
-    display: "flex",
-    alignItems: "center",
-    transition: "border-color 0.3s ease",
-    outline: "none"
-  },
-  dropdownMenu: {
-    position: "absolute",
-    top: "100%",
-    left: 0,
-    right: 0,
-    background: "#1a1a2e",
-    border: "2px solid #475569",
-    borderRadius: "10px",
-    maxHeight: "200px",
-    overflowY: "auto",
-    zIndex: 1000,
-    marginTop: "5px"
-  },
-  dropdownItem: {
-    padding: "12px 15px",
-    cursor: "pointer",
-    display: "flex",
-    alignItems: "center",
-    transition: "background-color 0.3s ease",
-    borderBottom: "1px solid #475569"
-  },
-  errorMessage: {
-    color: "#ef4444",
-    background: "rgba(239, 68, 68, 0.1)",
-    border: "1px solid #ef4444",
-    borderRadius: "8px",
-    padding: "12px",
-    marginBottom: "20px",
-    textAlign: "center"
-  },
-  successMessage: {
-    color: "#10b981",
-    background: "rgba(16, 185, 129, 0.1)",
-    border: "1px solid #10b981",
-    borderRadius: "8px",
-    padding: "12px",
-    marginBottom: "20px",
-    textAlign: "center"
-  },
-  saveButton: {
-    width: "100%",
-    padding: "15px",
-    background: "linear-gradient(45deg, #6366f1, #8b5cf6)",
-    color: "white",
-    border: "none",
-    borderRadius: "10px",
-    fontSize: "18px",
-    fontWeight: "bold",
-    cursor: "pointer",
-    transition: "transform 0.3s ease",
-    outline: "none"
-  },
-  saveButtonDisabled: {
-    opacity: 0.6,
-    cursor: "not-allowed"
-  }
-};
+  // Dynamic field templates based on title keywords
+  const assetFieldTemplates = {
+    instagram: ["Username", "Password", "Notes"],
+    "hospital payment": ["Hospital Name", "Receipt Number", "Date", "Notes"],
+    "university email": ["Name", "Email", "Roll Number", "Notes"],
+    "bank account": ["Account Number", "Bank Name", "IFSC", "Password/Pin", "Notes"],
+    default: ["Identifier", "Password/Security Info", "Notes"]
+  };
 
-useEffect(() => {
-  const handleClickOutside = (event) => {
-    if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-      setIsDropdownOpen(false);
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Update fields dynamically when title changes
+  useEffect(() => {
+    const lower = title.toLowerCase();
+    let template = assetFieldTemplates.default;
+    if (lower.includes("instagram")) template = assetFieldTemplates.instagram;
+    else if (lower.includes("hospital") || lower.includes("receipt")) template = assetFieldTemplates["hospital payment"];
+    else if (lower.includes("university") || lower.includes("college") || lower.includes("roll")) template = assetFieldTemplates["university email"];
+    else if (lower.includes("bank") || lower.includes("paypal") || lower.includes("account")) template = assetFieldTemplates["bank account"];
+
+    setFields(template.map(f => ({ name: f, value: "" })));
+  }, [title]);
+
+  // AI scan raw data
+  const handleScanAssets = useCallback(() => {
+    if (!rawData.trim()) return setError("Please paste raw data first");
+
+    const previewParts = [];
+    const updatedFields = fields.map(f => {
+      let val = f.value;
+      const lowerRaw = rawData.toLowerCase();
+
+      // Simple regex auto-fill
+      if (f.name.toLowerCase().includes("email")) {
+        const emailMatch = rawData.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
+        if (emailMatch) { val = emailMatch[0]; previewParts.push(`Email: ${val}`); }
+      }
+      if (f.name.toLowerCase().includes("username")) {
+        const userMatch = rawData.match(/username[:=]\s*([^\s]+)/i);
+        if (userMatch) { val = userMatch[1]; previewParts.push(`Username: ${val}`); }
+      }
+      if (f.name.toLowerCase().includes("password") || f.name.toLowerCase().includes("pin")) {
+        const pwMatch = rawData.match(/(?:pw|pass|password|pin)[:=\s]*([a-zA-Z0-9@$!%*?&]{4,})/i);
+        if (pwMatch) { val = pwMatch[1]; previewParts.push(`Password: ${val.substring(0,4)}****`); }
+      }
+      if (f.name.toLowerCase().includes("receipt")) {
+        const recMatch = rawData.match(/receipt[:=\s]*([^\s]+)/i);
+        if (recMatch) { val = recMatch[1]; previewParts.push(`Receipt: ${val}`); }
+      }
+      if (f.name.toLowerCase().includes("hospital")) {
+        const hospMatch = rawData.match(/hospital[:=\s]*([^\n]+)/i);
+        if (hospMatch) { val = hospMatch[1]; previewParts.push(`Hospital: ${val}`); }
+      }
+      if (f.name.toLowerCase().includes("roll")) {
+        const rollMatch = rawData.match(/roll[:=\s]*([^\s]+)/i);
+        if (rollMatch) { val = rollMatch[1]; previewParts.push(`Roll: ${val}`); }
+      }
+      return { ...f, value: val };
+    });
+
+    setFields(updatedFields);
+    setScanPreview(previewParts.join("\n"));
+    setSuccess("✅ Scan complete!");
+    setError("");
+  }, [rawData, fields]);
+
+  // Add asset
+  const handleAddAsset = useCallback(async () => {
+    if (!auth.currentUser) {
+      setError("You must be logged in to add an asset. Redirecting...");
+      setTimeout(() => navigate("/login"), 2000);
+      return;
     }
-  };
 
-  document.addEventListener("mousedown", handleClickOutside);
-  return () => {
-    document.removeEventListener("mousedown", handleClickOutside);
-  };
-}, []);
+    if (!title || fields.every(f=>!f.value)) {
+      setError("Please fill the title and at least one field");
+      return;
+    }
 
+    setLoading(true);
+    setError("");
 
+    try {
+      // Encrypt all fields
+      const encryptedFields = await Promise.all(fields.map(async f => {
+        let enc = "";
+        try { enc = encryptField(f.value, auth.currentUser.email); } 
+        catch { enc = "[Encryption Failed]"; }
+        return { fieldName: f.name, encryptedValue: enc };
+      }));
 
-const handleScanAssets = () => {
-  if (!rawData.trim()) {
-    setError("Please paste raw data first");
-    return;
-  }
+      await addDoc(collection(db, "assets"), {
+        userId: auth.currentUser.uid,
+        title,
+        fields: encryptedFields,
+        category,
+        createdAt: serverTimestamp()
+      });
 
-  // Simple AI-like heuristic scanner
-  const lowerRaw = rawData.toLowerCase();
-  
-  // Extract email/username
-  const emailMatch = rawData.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
-  if (emailMatch) {
-    setUsername(emailMatch[0]);
-  }
+      setSuccess("Asset saved successfully!");
+      setTimeout(() => {
+        setTitle(""); setRawData(""); setFields([]);
+        navigate("/view-assets");
+      }, 1500);
+    } catch (err) {
+      setError(err.message);
+    } finally { setLoading(false); }
+  }, [title, fields, category, navigate]);
 
-  // Guess title from common patterns
-  if (lowerRaw.includes('gmail') || lowerRaw.includes('google')) setTitle('Gmail Account');
-  else if (lowerRaw.includes('outlook') || lowerRaw.includes('hotmail')) setTitle('Outlook Account');
-  else if (lowerRaw.includes('bank') || lowerRaw.includes('paypal')) setTitle('Bank/Payment Account');
-  else if (lowerRaw.includes('@yahoo')) setTitle('Yahoo Account');
-  else setTitle('New Account');
+  return (
+    <div style={{ display: "flex", background: "#121226", minHeight: "100vh", color: "white" }}>
+      <Sidebar />
+      <div style={{ marginLeft: "260px", padding: "40px", width: "100%" }}>
+        <h1 style={{ textAlign: "center", fontSize: "2.5rem", marginBottom: "10px" }}>Add Digital Asset</h1>
+        <p style={{ textAlign: "center", color: "#94a3b8", fontSize: "1.1rem" }}>Securely store your important digital information</p>
 
-  // Guess category
-  if (lowerRaw.includes('bank') || lowerRaw.includes('paypal') || lowerRaw.includes('finance')) setCategory('financial');
-  else if (lowerRaw.includes('crypto') || lowerRaw.includes('wallet')) setCategory('crypto');
-  else if (lowerRaw.includes('netflix') || lowerRaw.includes('spotify')) setCategory('streaming');
-  else if (lowerRaw.includes('facebook') || lowerRaw.includes('twitter') || lowerRaw.includes('instagram')) setCategory('social');
-  else setCategory('password');
-
-  setError("");
-  setSuccess("Assets scanned and auto-filled! Review and save.");
-};
-
-// Removed placeholder - now using real CryptoJS from encryption.js
-
-const handleAddAsset = async () => {
-  if (!auth.currentUser) {
-    setError("You must be logged in to add an asset");
-    return;
-  }
-
-  if (!title || !username) {
-    setError("Please fill title and username");
-    return;
-  }
-
-  setLoading(true);
-  setError("");
-
-  try {
-    console.log("Saving asset with data:", {
-      userId: auth.currentUser.uid,
-      title,
-      username,
-      password,
-      category,
-      notes,
-    });
-
-    await addDoc(collection(db, "assets"), {
-      userId: auth.currentUser.uid,
-      title,
-      username,
-      encryptedPassword: encryptField(password, auth.currentUser?.email || 'default@example.com'), // Encrypted
-      category,
-      encryptedNotes: encryptField(notes, auth.currentUser?.email || 'default@example.com'), // Encrypted
-      createdAt: serverTimestamp()
-    });
-
-    setSuccess("Asset saved successfully (encrypted)!");
-
-    setTimeout(() => {
-      setTitle("");
-      setUsername("");
-      setPassword("");
-      setNotes("");
-      setRawData("");
-      navigate("/view-assets");
-    }, 1500);
-  } catch (err) {
-    setError(err.message);
-  } finally {
-    setLoading(false);
-  }
-};
-
-
-
-return(
-  <div style={styles.container}>
-    <Sidebar/>
-    <div style={styles.main}>
-      <div style={styles.header}>
-        <h1 style={styles.title}>Add Digital Asset</h1>
-        <p style={styles.subtitle}>Securely store your important digital information</p>
-      </div>
-
-      <div style={styles.formCard}>
-        <h2 style={styles.formTitle}>Asset Information</h2>
-
-        <div style={styles.formGroup}>
-          <label style={styles.label}>Asset Title *</label>
-          <input
-            type="text"
-            placeholder="e.g., Gmail Account, Bank Login"
-            value={title}
-            onChange={(e)=>setTitle(e.target.value)}
-            style={styles.input}
-            required
-          />
-        </div>
-
-        <div style={styles.formGroup}>
-          <label style={styles.label}>Username/Email *</label>
-          <input
-            type="text"
-            placeholder="Enter username or email"
-            value={username}
-            onChange={(e)=>setUsername(e.target.value)}
-            style={styles.input}
-            required
-          />
-        </div>
-
-        <div style={styles.formGroup}>
-          <label style={styles.label}>Password/Security Info</label>
-          <input
-            type="password"
-            placeholder="Enter password or security details"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            style={styles.input}
-          />
-        </div>
-
-        {/* AI Asset Scanner */}
-        <div style={styles.formGroup}>
-          <button
-            type="button"
-            onClick={() => setShowAdvanced(!showAdvanced)}
-            style={{
-              ...styles.saveButton,
-              padding: "10px",
-              fontSize: "14px",
-              background: showAdvanced ? "#ef4444" : "#10b981"
-            }}
-          >
-            {showAdvanced ? "Hide" : "🚀 AI Scan Assets"} (Advanced)
-          </button>
-        </div>
-        {showAdvanced && (
-          <div style={styles.formGroup}>
-            <label style={styles.label}>Paste Raw Data (email, pw, account info)</label>
-            <textarea
-              placeholder="Paste messy data here e.g., 'gmail: john@gmail.com pw:secret123 bank login...'"
-              value={rawData}
-              onChange={(e) => setRawData(e.target.value)}
-              style={styles.textarea}
-            />
-            <button
-              onClick={handleScanAssets}
-              style={{
-                ...styles.saveButton,
-                padding: "10px",
-                marginTop: "10px",
-                background: "linear-gradient(45deg, #f59e0b, #fbbf24)"
-              }}
-            >
-              ✨ Scan &amp; Auto-fill
-            </button>
+        <div style={{ maxWidth: "800px", margin: "0 auto", padding: "40px", borderRadius: "20px", background: "#1e293b" }}>
+          {/* Title */}
+          <div style={{ marginBottom: "25px" }}>
+            <label>Asset Title *</label>
+            <input type="text" placeholder="Gmail, Bank Login..." value={title} onChange={e=>setTitle(e.target.value)} style={{ width:"100%", padding:"15px", borderRadius:"10px", border:"2px solid #475569", background:"#1a1a2e", color:"white" }}/>
           </div>
-        )}
 
-        <div style={styles.formGroup}>
-          <label style={styles.label}>Category</label>
-          <div style={styles.dropdownContainer} ref={dropdownRef}>
-            <button
-              type="button"
-              style={styles.dropdownButton}
-              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-            >
-              {selectedCategory.icon} {selectedCategory.label}
+          {/* AI Scan */}
+          <div style={{ marginBottom: "25px" }}>
+            <button type="button" onClick={()=>setShowAdvanced(!showAdvanced)} style={{ padding:"10px", fontSize:"14px", background:showAdvanced?"#ef4444":"#10b981" }}>
+              {showAdvanced ? "Hide" : "🚀 AI Scan Assets (Advanced)"}
             </button>
-            {isDropdownOpen && (
-              <ul style={styles.dropdownMenu}>
-                {categories.map(cat => (
-                  <li
-                    key={cat.value}
-                    style={styles.dropdownItem}
-                    onClick={() => { setCategory(cat.value); setIsDropdownOpen(false); }}
-                    onMouseEnter={() => setIsHovering(true)}
-                    onMouseLeave={() => setIsHovering(false)}
-                    style={isHovering ? { backgroundColor: '#334155' } : styles.dropdownItem}
-                  >
-                    {cat.icon} {cat.label}
-                  </li>
-                ))}
-              </ul>
+            {showAdvanced && (
+              <div style={{ marginTop:"10px" }}>
+                <textarea placeholder="Paste raw data here..." value={rawData} onChange={e=>setRawData(e.target.value)} style={{ width:"100%", padding:"15px", borderRadius:"10px", border:"2px solid #475569", background:"#1a1a2e", color:"white", minHeight:"100px" }}/>
+                <button onClick={handleScanAssets} style={{ marginTop:"10px", padding:"10px", background:"orange" }}>✨ Scan & Auto-fill</button>
+                {scanPreview && <pre style={{ color:"#94a3b8", marginTop:"10px", whiteSpace:"pre-wrap" }}>{scanPreview}</pre>}
+              </div>
             )}
           </div>
+
+          {/* Dynamic Fields */}
+          {fields.map((f, idx)=>(
+            <div style={{ marginBottom:"25px" }} key={idx}>
+              <label>{f.name}</label>
+              <input type="text" placeholder={`Enter ${f.name}`} value={f.value} onChange={e=>{
+                const newFields = [...fields]; newFields[idx].value = e.target.value; setFields(newFields);
+              }} style={{ width:"100%", padding:"15px", borderRadius:"10px", border:"2px solid #475569", background:"#1a1a2e", color:"white" }}/>
+            </div>
+          ))}
+
+          {/* Category */}
+          <div style={{ marginBottom:"25px" }} ref={dropdownRef}>
+            <label>Category</label>
+            <button type="button" onClick={()=>setIsDropdownOpen(!isDropdownOpen)} style={{ width:"100%", padding:"15px", borderRadius:"10px", border:"2px solid #475569", background:"#1a1a2e", color:"white", textAlign:"left", display:"flex", alignItems:"center" }}>
+              <span style={{marginRight:"10px"}}>{selectedCategory.icon}</span>
+              <span>{selectedCategory.label}</span>
+              <span style={{ marginLeft:"auto" }}>▼</span>
+            </button>
+            {isDropdownOpen && (
+              <div style={{ position:"absolute", top:"100%", left:0, right:0, background:"#1a1a2e", border:"2px solid #475569", borderRadius:"10px", maxHeight:"200px", overflowY:"auto", zIndex:1000 }}>
+                {categories.map(cat=>(<div key={cat.value} style={{ padding:"12px 15px", display:"flex", alignItems:"center", cursor:"pointer", borderBottom:"1px solid #475569"}} onClick={()=>{
+                  if(cat.value==='custom'){ setIsCustomMode(true); setIsDropdownOpen(false); } 
+                  else { setCategory(cat.value); setIsCustomMode(false); setCustomCategoryInput(''); setIsDropdownOpen(false); }
+                }}>
+                  <span style={{marginRight:"10px"}}>{cat.icon}</span><span>{cat.label}</span>
+                </div>))}
+              </div>
+            )}
+            {isCustomMode && <input type="text" placeholder="Type your custom category..." value={customCategoryInput} onChange={e=>setCustomCategoryInput(e.target.value)} onKeyDown={e=>{
+              if(e.key==='Enter' && e.target.value.trim()){
+                setCategory(`custom-${e.target.value.trim().toLowerCase().replace(/\s+/g,'-')}`);
+                setIsCustomMode(false); setCustomCategoryInput(''); setIsDropdownOpen(false);
+              }
+            }} autoFocus style={{ marginTop:"10px", width:"100%", padding:"15px", borderRadius:"10px", border:"2px solid #475569", background:"#1a1a2e", color:"white"}} />}
+          </div>
+
+          {/* Messages */}
+          {error && <div style={{ color:"#ef4444", background:"rgba(239,68,68,0.1)", padding:"12px", borderRadius:"8px", marginBottom:"20px", textAlign:"center"}}>{error}</div>}
+          {success && <div style={{ color:"#10b981", background:"rgba(16,185,129,0.1)", padding:"12px", borderRadius:"8px", marginBottom:"20px", textAlign:"center"}}>{success}</div>}
+
+          {/* Save Button */}
+          <button onClick={handleAddAsset} disabled={loading} style={{ width:"100%", padding:"15px", background:"#6366f1", color:"white", border:"none", borderRadius:"10px", fontSize:"18px", fontWeight:"bold", cursor: loading ? "not-allowed":"pointer", transform: isHovering?"scale(1.02)":"none"}} onMouseEnter={()=>!loading && setIsHovering(true)} onMouseLeave={()=>setIsHovering(false)}>
+            {loading ? "Saving Asset..." : "Save Digital Asset"}
+          </button>
         </div>
-
-        <div style={styles.formGroup}>
-          <label style={styles.label}>Additional Notes</label>
-          <textarea
-            placeholder="Any additional information or instructions"
-            value={notes}
-            onChange={(e)=>setNotes(e.target.value)}
-            style={styles.textarea}
-          />
-        </div>
-
-        {error && <div style={styles.errorMessage}>{error}</div>}
-        {success && <div style={styles.successMessage}>{success}</div>}
-
-        <button
-          onClick={handleAddAsset}
-          disabled={loading}
-          style={{
-            ...styles.saveButton,
-            ...(loading ? styles.saveButtonDisabled : {}),
-            transform: loading || !isHovering ? 'none' : 'scale(1.02)'
-          }}
-          onMouseEnter={() => !loading && setIsHovering(true)}
-          onMouseLeave={() => setIsHovering(false)}
-        >
-          {loading ? "Saving Asset..." : "Save Digital Asset"}
-        </button>
       </div>
     </div>
-  </div>
-);
-
+  );
 }
 
 export default AddAsset;

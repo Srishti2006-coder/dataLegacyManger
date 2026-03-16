@@ -1,57 +1,52 @@
 
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, onAuthStateChanged } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { doc, updateDoc, getDoc } from "firebase/firestore";
-import { auth, db } from "../services/firebase";
+import { auth, verifyNomineeToken } from "../services/firebase";
 
 function NomineeVerify() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [status, setStatus] = useState("verifying");
   const [error, setError] = useState("");
+  const [user, setUser] = useState(null);
 
   const token = searchParams.get("token");
 
   useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
+
+    return unsubscribe;
+  }, []);
+
+  useEffect(() => {
+    if (!token) {
+      setStatus("invalid");
+      setError("No verification token found.");
+      return;
+    }
+
+    if (!user) {
+      // Require Google login first
+      navigate("/login?redirect=nominee-verify&token=" + encodeURIComponent(token), { replace: true });
+      return;
+    }
+
     const verifyNominee = async () => {
-      if (!token) {
-        setStatus("invalid");
-        return;
-      }
-
       try {
-        // In prod, call Firebase Function nomineeVerify(token)
-        // For demo, simulate verification by token matching pattern
-        const isValid = token.startsWith("nominee-verify-");
-        if (!isValid) {
-          setStatus("invalid");
-          return;
-        }
-
-        // Extract nominee ID from token (demo)
-        const nomineeId = token.split("-")[2];
-        const nomineeRef = doc(db, "nominees", nomineeId);
-        const nomineeSnap = await getDoc(nomineeRef);
-
-        if (nomineeSnap.exists()) {
-          await updateDoc(nomineeRef, {
-            verified: true,
-            verifiedAt: new Date()
-          });
-          setStatus("success");
-        } else {
-          setStatus("invalid");
-        }
+        const result = await verifyNomineeToken({ token });
+        setStatus("success");
       } catch (err) {
         console.error("Verification failed:", err);
-        setError("Verification failed. Please contact the owner.");
+        setError(err.message || "Verification failed. Token may be invalid or expired.");
         setStatus("error");
       }
     };
 
     verifyNominee();
-  }, [token]);
+  }, [token, user, navigate]);
 
   const getStatusUI = () => {
     switch (status) {
@@ -68,7 +63,7 @@ function NomineeVerify() {
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "60vh", color: "white", textAlign: "center" }}>
             <div style={{ fontSize: "4rem", marginBottom: "20px", color: "#10b981" }}>✅</div>
             <h2>Verification Successful!</h2>
-            <p style={{ marginBottom: "30px" }}>You are now verified as a nominee. You can request emergency access when needed.</p>
+            <p style={{ marginBottom: "30px" }}>Your identity has been verified via Google login. You are now an authorized nominee.</p>
             <button
               onClick={() => navigate("/emergency-access")}
               style={{

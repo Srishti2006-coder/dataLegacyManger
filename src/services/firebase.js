@@ -1,7 +1,7 @@
-
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
+import { getFunctions, httpsCallable } from "firebase/functions";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBjq4cg1reo7Adwf7TSP-ktO_g3xRNtwvU",
@@ -20,3 +20,9 @@ export const auth = getAuth(app);
 
 // database
 export const db = getFirestore(app);
+
+// cloud functions
+const functions = getFunctions(app);
+export const sendNomineeVerificationEmail = httpsCallable(functions, "sendNomineeVerificationEmail");
+export const verifyNomineeToken = httpsCallable(functions, "verifyNomineeToken");
+

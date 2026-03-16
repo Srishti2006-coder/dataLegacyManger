@@ -1,32 +1,40 @@
-# Data Legacy Manager - AI Nominee Access Implementation TODO
+# Fix Send Verification Button Issue
 
-## Approved Plan Steps (User confirmed: OK)
+## Status: CLI Setup ✅ | Emulator Testing Next
 
-### Phase 1: Core Fixes & AI Scanner (Priority 1)
-- [ ] ✅ **Step 1**: Create TODO.md (current)
-- [x] **Step 2**: Install crypto-js && Fix AddAsset.jsx (formatting, AI scanner, base64 encrypt prep) ✓
-- [x] **Step 3**: Create src/services/encryption.js (CryptoJS AES utils) + Integrate into AddAsset.jsx ✓
+### Completed:
+- [x] Firebase login
+- [x] Project selected (`firebase use [project-id]`)
+- [x] /nominee page accessible
 
-**Progress**: 7/12 complete
+### 1. Install Functions Dependencies
+- [ ] cd functions &amp;&amp; npm install firebase-functions firebase-admin @sendgrid/mail jsonwebtoken
 
-### Phase 2: Nominee Verification & Emergency Flow ✓ COMPLETE
+### 2. Start Emulators ✅ (executed)
+```
+firebase emulators:start --only functions,firestore,ui,auth
+```
+Emulator Functions: http://localhost:5001
+- App runs on http://localhost:3000
+- Functions on http://localhost:5001
+- Test: Add nominee w/ email → click Send Verification → check functions logs (emulator console)
 
-### Phase 3: Vault & Access Control
-- [x] **Step 7**: Implement Vault.jsx (user full view w/ decryption, nominee-ready) ✓
+### 3. Mock SendGrid ✅ 
+functions/index.js updated with emulator logging (logs URL to copy/paste)
 
-### Phase 4: Firebase Backend & Testing
-- [ ] **Step 9**: Firebase Functions setup (production OTP/email - optional for demo)
-- [ ] **Step 10**: Update Firestore rules
-- [ ] **Step 11**: Full e2e test
-- [ ] **Step 12**: Deploy
-- [ ] **Step 8**: Update src/App.js (add new routes: /nominee-verify, /emergency-access)
+### 4. Test Full Flow
+- [ ] Add nominee w/ email in /nominee
+- [ ] Click Send Verification → check emulator logs
+- [ ] Manually get generated verificationUrl from logs
+- [ ] Visit /nominee-verify?token=... → login different Google acct → see ✅
 
-### Phase 4: Firebase Backend
-- [ ] **Step 9**: Firebase Functions setup (nomineeVerify, sendOTP, verifyOTP)
-- [ ] **Step 10**: Update firebase.js, Firestore rules (encrypted fields, tempAccess)
-- [ ] **Step 11**: Test end-to-end: Add asset (scan/encrypt) → nominee add/verify → emergency OTP → vault access
-- [ ] **Step 12**: Deploy functions, complete!
+### 5. Production Deploy (after emulator works)
+- [ ] firebase functions:config:set sendgrid.key="SG.xxx"
+- [ ] firebase deploy --only functions
 
-**Next Step**: Step 2 - Install deps & update AddAsset.jsx. Confirm before editing files.
+### 6. Verify
+- [ ] Test real email
+- [ ] functions:log
 
-**Progress**: 1/12 complete
+**Current Progress: 30%** (CLI ready, emulator next)
+
