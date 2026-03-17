@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import Sidebar from "../layout/Sidebar";
 import { auth, db, sendNomineeVerificationEmail } from "../services/firebase";
 import { collection, addDoc, getDocs, deleteDoc, doc, query, where, updateDoc } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
@@ -8,19 +9,19 @@ function Nominee() {
   const user = auth.currentUser;
   const [nominees, setNominees] = useState([]);
   const [assets, setAssets] = useState([]);
-const [formData, setFormData] = useState({
+  const [error, setError] = useState(""); 
+  const [formData, setFormData] = useState({
     name: "",
     email: "",
     relationship: "",
     phone: "",
-    verified: false, // New: verification status
+    verified: false,
     verificationSent: false,
     assignedAssets: []
   });
   const [editingId, setEditingId] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  const [success, setSuccess] = useState(""); 
 
   const fetchNominees = useCallback(async () => {
     try {
@@ -29,7 +30,6 @@ const [formData, setFormData] = useState({
       const nomineesData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setNominees(nomineesData);
     } catch (error) {
-      console.error("Error fetching nominees:", error);
       setError("Failed to load nominees. Please try again.");
     }
   }, [user]);
@@ -41,7 +41,6 @@ const [formData, setFormData] = useState({
       const assetsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setAssets(assetsData);
     } catch (error) {
-      console.error("Error fetching assets:", error);
       setError("Failed to load assets. Please try again.");
     }
   }, [user]);
@@ -51,7 +50,7 @@ const [formData, setFormData] = useState({
       fetchNominees();
       fetchAssets();
     }
-  }, [user, fetchNominees, fetchAssets]); // user is the only external dependency
+  }, [user, fetchNominees, fetchAssets]);
 
   const getNomineeAssets = (nomineeId) => {
     const nominee = nominees.find(n => n.id === nomineeId);
@@ -70,7 +69,7 @@ const [formData, setFormData] = useState({
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-if (!formData.name || !formData.relationship) {
+    if (!formData.name || !formData.relationship) {
       setError("Please fill in all required fields");
       return;
     }
@@ -141,15 +140,7 @@ if (!formData.name || !formData.relationship) {
 
   return (
     <div style={{ display: "flex", background: "linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%)", minHeight: "100vh", color: "white" }}>
-      <div style={{ width: "240px", background: "linear-gradient(180deg, #0f172a 0%, #1e293b 100%)", color: "white", padding: "20px", position: "fixed", left: 0, top: 0, height: "100vh", boxShadow: "2px 0 10px rgba(0,0,0,0.1)" }}>
-        <h2 style={{ marginBottom: "40px", fontSize: "24px", fontWeight: "bold", color: "#6366f1" }}>LegacyAI</h2>
-        <button style={{ background: "rgba(51, 65, 85, 0.5)", border: "1px solid #475569", borderRadius: "12px", color: "white", padding: "15px 20px", marginBottom: "10px", cursor: "pointer", width: "100%", transition: "all 0.3s ease" }} onClick={() => navigate("/dashboard")}>Dashboard</button>
-        <button style={{ background: "rgba(51, 65, 85, 0.5)", border: "1px solid #475569", borderRadius: "12px", color: "white", padding: "15px 20px", marginBottom: "10px", cursor: "pointer", width: "100%", transition: "all 0.3s ease" }} onClick={() => navigate("/add-asset")}>Add Asset</button>
-        <button style={{ background: "rgba(51, 65, 85, 0.5)", border: "1px solid #475569", borderRadius: "12px", color: "white", padding: "15px 20px", marginBottom: "10px", cursor: "pointer", width: "100%", transition: "all 0.3s ease" }} onClick={() => navigate("/view-assets")}>View Assets</button>
-        <button style={{ background: "rgba(99, 102, 241, 0.3)", border: "1px solid #6366f1", borderRadius: "12px", color: "white", padding: "15px 20px", marginBottom: "10px", cursor: "pointer", width: "100%", transition: "all 0.3s ease" }} onClick={() => navigate("/nominee")}>Nominee</button>
-        <button style={{ background: "rgba(51, 65, 85, 0.5)", border: "1px solid #475569", borderRadius: "12px", color: "white", padding: "15px 20px", marginBottom: "10px", cursor: "pointer", width: "100%", transition: "all 0.3s ease" }} onClick={() => navigate("/profile")}>Profile</button>
-        <button style={{ background: "rgba(51, 65, 85, 0.5)", border: "1px solid #475569", borderRadius: "12px", color: "white", padding: "15px 20px", marginBottom: "10px", cursor: "pointer", width: "100%", transition: "all 0.3s ease" }} onClick={() => navigate("/settings")}>Settings</button>
-      </div>
+      <Sidebar />
 
       <div style={{ marginLeft: "260px", padding: "40px", width: "100%" }}>
         <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
@@ -196,7 +187,7 @@ if (!formData.name || !formData.relationship) {
                     required
                   />
                 </div>
-    <div style={{ marginBottom: "20px" }}>
+                <div style={{ marginBottom: "20px" }}>
                   <label style={{ display: "block", marginBottom: "5px", color: "#cbd5e1", fontWeight: "500" }}>Phone Number</label>
                   <input
                     type="tel"
@@ -338,7 +329,6 @@ if (!formData.name || !formData.relationship) {
                                 setSuccess(result.data.message || "Verification email sent!");
                                 fetchNominees();
                               } catch (error) {
-                                console.error("Send verification error:", error);
                                 setError(error.message || "Failed to send verification email.");
                               }
                             }}

@@ -1,5 +1,3 @@
-
-
 import { useEffect, useState, onAuthStateChanged } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { auth, verifyNomineeToken } from "../services/firebase";
@@ -36,7 +34,7 @@ function NomineeVerify() {
 
     const verifyNominee = async () => {
       try {
-        const result = await verifyNomineeToken({ token });
+        await verifyNomineeToken({ token });
         setStatus("success");
       } catch (err) {
         console.error("Verification failed:", err);

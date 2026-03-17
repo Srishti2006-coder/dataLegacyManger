@@ -45,7 +45,6 @@ function ViewAssets() {
     if (!auth.currentUser) return;
     setLoading(true);
     try {
-      // Fetch assets
       const assetsQuery = query(
         collection(db, "assets"),
         where("userId", "==", auth.currentUser.uid)
@@ -53,7 +52,6 @@ function ViewAssets() {
       const assetsSnapshot = await getDocs(assetsQuery);
       const assetsData = assetsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-      // Fetch nominees
       const nomineesQuery = query(
         collection(db, "nominees"),
         where("userId", "==", auth.currentUser.uid)
@@ -61,13 +59,10 @@ function ViewAssets() {
       const nomineesSnapshot = await getDocs(nomineesQuery);
       const nomineesData = nomineesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-      console.log("Loaded assets:", assetsData);
-      console.log("Loaded nominees:", nomineesData);
-
       setAssets(assetsData);
       setNominees(nomineesData);
     } catch (error) {
-      console.error("Error fetching data:", error);
+      // Handled by loading state
     } finally {
       setLoading(false);
     }
@@ -100,7 +95,7 @@ function ViewAssets() {
       });
       setEditingNominee(null);
       setEditForm({ name: "", email: "", relationship: "", phone: "" });
-      fetchData(); // Refresh data
+      fetchData();
       alert("Nominee updated successfully!");
     } catch (error) {
       alert("Error updating nominee: " + error.message);
@@ -111,7 +106,7 @@ function ViewAssets() {
     if (window.confirm("Are you sure you want to delete this nominee?")) {
       try {
         await deleteDoc(doc(db, "nominees", nomineeId));
-        fetchData(); // Refresh data
+        fetchData();
         alert("Nominee deleted successfully!");
       } catch (error) {
         alert("Error deleting nominee: " + error.message);
@@ -130,7 +125,7 @@ function ViewAssets() {
         <Sidebar />
         <div style={styles.main}>
           <div style={{ textAlign: "center", padding: "50px" }}>
-            <div style={{ fontSize: "2rem", marginBottom: "20px" }}>⏳</div>
+            <div style={{ fontSize: "2rem", marginBottom: "20px" }}>...</div>
             <p>Loading your digital legacy...</p>
           </div>
         </div>
@@ -148,7 +143,6 @@ function ViewAssets() {
           <p style={styles.subtitle}>All your important information in one secure place</p>
         </div>
 
-        {/* User Information Section */}
         <div style={styles.userSection}>
           <h2 style={styles.sectionTitle}>👤 Owner Information</h2>
           <div style={styles.userCard}>
@@ -160,12 +154,11 @@ function ViewAssets() {
           </div>
         </div>
 
-        {/* Assets Section */}
         <div style={styles.section}>
           <h2 style={styles.sectionTitle}>📁 Your Assets ({assets.length})</h2>
           {assets.length === 0 ? (
             <div style={styles.emptyState}>
-              <div style={{ fontSize: "3rem", marginBottom: "20px" }}>📦</div>
+              <div style={{ fontSize: "3rem", marginBottom: "20px" }}>...</div>
               <p>No assets added yet.</p>
               <button
                 style={styles.addButton}
@@ -215,12 +208,11 @@ function ViewAssets() {
           )}
         </div>
 
-        {/* Nominees Section */}
         <div style={styles.section}>
           <h2 style={styles.sectionTitle}>👥 Your Nominees ({nominees.length})</h2>
           {nominees.length === 0 ? (
             <div style={styles.emptyState}>
-              <div style={{ fontSize: "3rem", marginBottom: "20px" }}>👤</div>
+              <div style={{ fontSize: "3rem", marginBottom: "20px" }}>...</div>
               <p>No nominees added yet.</p>
               <button
                 style={styles.addButton}
@@ -234,7 +226,6 @@ function ViewAssets() {
               {nominees.map((nominee) => (
                 <div key={nominee.id} style={styles.nomineeCard}>
                   {editingNominee === nominee.id ? (
-                    // Edit Mode
                     <div style={styles.editForm}>
                       <h4>Edit Nominee</h4>
                       <input
@@ -271,7 +262,6 @@ function ViewAssets() {
                       </div>
                     </div>
                   ) : (
-                    // View Mode
                     <>
                       <div style={styles.nomineeHeader}>
                         <h3>{nominee.name}</h3>
@@ -303,7 +293,6 @@ function ViewAssets() {
           )}
         </div>
 
-        {/* Summary Section */}
         <div style={styles.summarySection}>
           <h2 style={styles.sectionTitle}>📊 Legacy Summary</h2>
           <div style={styles.summaryCard}>

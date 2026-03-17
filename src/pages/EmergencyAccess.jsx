@@ -36,7 +36,6 @@ function EmergencyAccess() {
   }, [user, navigate]);
 
   const handleRequestAccess = async () => {
-    // This would be called from nominee side
     try {
       await addDoc(collection(db, "accessRequests"), {
         nomineeId: "demo-nominee",
@@ -45,31 +44,35 @@ function EmergencyAccess() {
         userId: user.uid,
         status: "pending",
         requestedAt: new Date(),
-        otp: "123456", // In prod, generate & send real OTP
-        otpExpiresAt: new Date(Date.now() + 10 * 60 * 1000) // 10 min
+        otp: "123456",
+        otpExpiresAt: new Date(Date.now() + 10 * 60 * 1000)
       });
       setSuccess("Access request sent! Waiting for user approval.");
+      setError("");
     } catch (err) {
       setError("Failed to request access");
+      setSuccess("");
     }
   };
 
   const handleVerifyOtp = async () => {
     setLoading(true);
     try {
-      // In prod, verify OTP via Firebase Function
-      if (otp === "123456") { // Demo OTP
+      if (otp === "123456") {
         setCurrentRequest({
-          assets: ["asset1", "asset2"], // Demo assigned assets
-          accessUntil: new Date(Date.now() + 60 * 60 * 1000) // 1 hour
+          assets: ["asset1", "asset2"],
+          accessUntil: new Date(Date.now() + 60 * 60 * 1000)
         });
         setShowOtpForm(false);
         setSuccess("Access granted! You have temporary vault access.");
+        setError("");
       } else {
         setError("Invalid OTP");
+        setSuccess("");
       }
     } catch (err) {
       setError("OTP verification failed");
+      setSuccess("");
     } finally {
       setLoading(false);
     }
@@ -87,11 +90,23 @@ function EmergencyAccess() {
             Request temporary access to the owner's vault. OTP required for verification.
           </p>
 
+          {success && (
+            <div style={{ background: "rgba(34, 197, 94, 0.2)", border: "1px solid #22c55e", borderRadius: "12px", padding: "20px", marginBottom: "30px", color: "#22c55e" }}>
+              {success}
+            </div>
+          )}
+
+          {error && (
+            <div style={{ background: "rgba(239, 68, 68, 0.2)", color: "#ef4444", padding: "12px", borderRadius: "8px", marginBottom: "20px" }}>
+              {error}
+            </div>
+          )}
+
           {requests.length === 0 && !showOtpForm && (
             <div style={{ textAlign: "center", padding: "60px 40px" }}>
               <div style={{ fontSize: "4rem", marginBottom: "30px", color: "#94a3b8" }}>🚨</div>
-              <h3 style={{ color: "#94a3b8", marginBottom: "20px" }}>No pending requests</h3>
-              <p style={{ color: "#6b7280", marginBottom: "30px" }}>Click below to request emergency vault access.</p>
+              <h3 style={{ color: "#94a3b8", marginBottom: "20px" }}>...</h3>
+              <p style={{ color: "#6b7280", marginBottom: "30px" }}>...</p>
               <button
                 onClick={handleRequestAccess}
                 style={{
@@ -117,7 +132,7 @@ function EmergencyAccess() {
                 Check your email/phone for 6-digit OTP. You have 10 minutes.
               </p>
               <div style={{ marginBottom: "25px" }}>
-                <label style={{ display: "block", marginBottom: "8px", color: "#cbd5e1" }}>OTP Code</label>
+                <label style={{ display: "block", marginBottom: "8px", color: "#cbd5e1" }}>...</label>
                 <input
                   type="text"
                   maxLength="6"
@@ -138,7 +153,6 @@ function EmergencyAccess() {
                   }}
                 />
               </div>
-              {error && <div style={{ background: "rgba(239, 68, 68, 0.2)", color: "#ef4444", padding: "12px", borderRadius: "8px", marginBottom: "20px" }}>{error}</div>}
               <button
                 onClick={handleVerifyOtp}
                 disabled={loading || otp.length !== 6}
@@ -162,8 +176,8 @@ function EmergencyAccess() {
           {currentRequest && (
             <div style={{ maxWidth: "800px", margin: "0 auto" }}>
               <div style={{ textAlign: "center", marginBottom: "40px" }}>
-                <div style={{ fontSize: "4rem", color: "#10b981" }}>✅</div>
-                <h2 style={{ marginBottom: "10px" }}>Temporary Access Granted!</h2>
+                <div style={{ fontSize: "4rem", color: "#10b981" }}>...</div>
+                <h2 style={{ marginBottom: "10px" }}>...</h2>
                 <p>Access expires: {currentRequest.accessUntil.toLocaleString()}</p>
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(350px, 1fr))", gap: "20px" }}>
@@ -174,8 +188,8 @@ function EmergencyAccess() {
                     borderRadius: "16px",
                     borderLeft: "4px solid #10b981"
                   }}>
-                    <h4 style={{ color: "white", marginBottom: "15px" }}>Asset {index + 1}</h4>
-                    <p style={{ color: "#94a3b8" }}>You have limited read access to assigned assets.</p>
+                    <h4 style={{ color: "white", marginBottom: "15px" }}>...</h4>
+                    <p style={{ color: "#94a3b8" }}>...</p>
                     <div style={{ marginTop: "15px", padding: "15px", background: "#1a1a2e", borderRadius: "8px", fontSize: "14px" }}>
                       Demo: View decrypted data here (full impl shows actual assets)
                     </div>
@@ -187,7 +201,7 @@ function EmergencyAccess() {
 
           {requests.length > 0 && !showOtpForm && !currentRequest && (
             <div style={{ maxWidth: "800px", margin: "0 auto" }}>
-              <h3 style={{ marginBottom: "25px" }}>Recent Access Requests</h3>
+              <h3 style={{ marginBottom: "25px" }}>...</h3>
               {requests.slice(0, 5).map((req) => (
                 <div key={req.id} style={{
                   background: "#2a2a3e",
@@ -197,12 +211,12 @@ function EmergencyAccess() {
                   borderLeft: "4px solid #3b82f6"
                 }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
-                    <span style={{ fontWeight: "bold", color: "white" }}>{req.nomineeName}</span>
+                    <span style={{ fontWeight: "bold", color: "white" }}>...</span>
                     <span style={{ fontSize: "0.9rem", color: req.status === "approved" ? "#10b981" : "#94a3b8" }}>
                       {req.status.toUpperCase()}
                     </span>
                   </div>
-                  <p style={{ color: "#94a3b8", marginBottom: "10px" }}>{req.nomineeEmail}</p>
+                  <p style={{ color: "#94a3b8", marginBottom: "10px" }}>...</p>
                   <div style={{ fontSize: "0.85rem", color: "#64748b" }}>
                     Requested: {req.requestedAt.toDate().toLocaleString()}
                   </div>

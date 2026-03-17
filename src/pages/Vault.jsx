@@ -35,7 +35,6 @@ function Vault() {
         setLoading(false);
       },
       (err) => {
-        console.error("Error fetching assets:", err);
         setError("Failed to load vault");
         setLoading(false);
       }
@@ -59,7 +58,7 @@ function Vault() {
     return icons[category] || "📦";
   };
 
-  if (loading) return <div style={{ padding: "40px", marginLeft: "260px", color: "white" }}>Loading vault...</div>;
+  if (loading) return <div style={{ padding: "40px", marginLeft: "260px", color: "white" }}>...</div>;
 
   return (
     <div style={{ display: "flex", background: "linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%)", minHeight: "100vh", color: "white" }}>
@@ -83,7 +82,7 @@ function Vault() {
             <div style={{ textAlign: "center", padding: "60px 20px" }}>
               <div style={{ fontSize: "4rem", marginBottom: "20px", color: "#94a3b8" }}>🔐</div>
               <h3 style={{ color: "#94a3b8", marginBottom: "10px" }}>Your vault is empty</h3>
-              <p style={{ color: "#6b7280", fontSize: "1rem" }}>Add your first digital asset to get started.</p>
+              <p style={{ color: "#6b7280", fontSize: "1rem" }}>...</p>
               <button
                 onClick={() => navigate("/add-asset")}
                 style={{

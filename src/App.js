@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { ThemeProvider } from "./context/ThemeContext";
 
 import Landing from "./pages/Landing";
 import Login from "./pages/Login";
@@ -16,43 +17,27 @@ import NomineeVerify from "./pages/NomineeVerify";
 import EmergencyAccess from "./pages/EmergencyAccess";
 
 function App() {
-
-return(
-
-<Router>
-
-<Routes>
-
-<Route path="/" element={<Landing />} />
-
-<Route path="/login" element={<Login />} />
-
-<Route path="/signup" element={<Signup />} />
-
-<Route path="/dashboard" element={<Dashboard />} />
-
-<Route path="/add-asset" element={<AddAsset />} />
-
-<Route path="/view-assets" element={<ViewAssets />} />
-
-<Route path="/nominee" element={<Nominee />} />
-
-<Route path="/profile" element={<Profile />} />
-
-<Route path="/settings" element={<Settings />} />
-
-<Route path="/vault" element={<Vault />} />
-
-<Route path="/will" element={<Will />} />
-        <Route path="/nominee-verify" element={<NomineeVerify />} />
-        <Route path="/emergency-access" element={<EmergencyAccess />} />
-
-</Routes>
-
-</Router>
-
-);
-
+  return (
+    <ThemeProvider>
+      <Router>
+        <Routes>
+          <Route path="/" element={<Landing />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/add-asset" element={<AddAsset />} />
+          <Route path="/view-assets" element={<ViewAssets />} />
+          <Route path="/nominee" element={<Nominee />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/settings" element={<Settings />} />
+          <Route path="/vault" element={<Vault />} />
+          <Route path="/will" element={<Will />} />
+          <Route path="/nominee-verify" element={<NomineeVerify />} />
+          <Route path="/emergency-access" element={<EmergencyAccess />} />
+        </Routes>
+      </Router>
+    </ThemeProvider>
+  );
 }
 
 export default App;

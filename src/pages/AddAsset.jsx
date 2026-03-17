@@ -79,12 +79,12 @@ function AddAsset() {
 
   // Update fields dynamically when title changes
   useEffect(() => {
-    const lower = title.toLowerCase();
+    const lowerRaw = title.toLowerCase();
     let template = assetFieldTemplates.default;
-    if (lower.includes("instagram")) template = assetFieldTemplates.instagram;
-    else if (lower.includes("hospital") || lower.includes("receipt")) template = assetFieldTemplates["hospital payment"];
-    else if (lower.includes("university") || lower.includes("college") || lower.includes("roll")) template = assetFieldTemplates["university email"];
-    else if (lower.includes("bank") || lower.includes("paypal") || lower.includes("account")) template = assetFieldTemplates["bank account"];
+if (lowerRaw.includes("instagram")) template = assetFieldTemplates.instagram;
+else if (lowerRaw.includes("hospital") || lowerRaw.includes("receipt")) template = assetFieldTemplates["hospital payment"];
+else if (lowerRaw.includes("university") || lowerRaw.includes("college") || lowerRaw.includes("roll")) template = assetFieldTemplates["university email"];
+else if (lowerRaw.includes("bank") || lowerRaw.includes("paypal") || lowerRaw.includes("account")) template = assetFieldTemplates["bank account"];
 
     setFields(template.map(f => ({ name: f, value: "" })));
   }, [title]);
@@ -96,7 +96,6 @@ function AddAsset() {
     const previewParts = [];
     const updatedFields = fields.map(f => {
       let val = f.value;
-      const lowerRaw = rawData.toLowerCase();
 
       // Simple regex auto-fill
       if (f.name.toLowerCase().includes("email")) {

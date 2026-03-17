@@ -1,6 +1,6 @@
-
 import Sidebar from "../layout/Sidebar";
 import { auth, db } from "../services/firebase";
+import VaultAIChatbot from "../components/VaultAIChatbot";
 import { useNavigate } from "react-router-dom";
 import { signOut } from "firebase/auth";
 import { useState, useEffect } from "react";
@@ -17,11 +17,7 @@ function Dashboard() {
     if (user) {
       const q = query(collection(db, "assets"), where("userId", "==", user.uid));
       const unsubscribe = onSnapshot(q, (querySnapshot) => {
-        try {
-          setTotalAssets(querySnapshot.size);
-        } catch (error) {
-          console.error("Error updating assets count:", error);
-        }
+        setTotalAssets(querySnapshot.size);
       });
 
       return unsubscribe; // Cleanup on unmount
@@ -32,11 +28,7 @@ function Dashboard() {
     if (user) {
       const q = query(collection(db, "nominees"), where("userId", "==", user.uid));
       const unsubscribe = onSnapshot(q, (querySnapshot) => {
-        try {
-          setTotalNominees(querySnapshot.size);
-        } catch (error) {
-          console.error("Error updating nominees count:", error);
-        }
+        setTotalNominees(querySnapshot.size);
       });
 
       return unsubscribe; // Cleanup on unmount
@@ -49,71 +41,73 @@ function Dashboard() {
   };
 
   return (
-
     <div style={{ display: "flex", background: "#020617", minHeight: "100vh" }}>
-
       {/* Sidebar */}
       <Sidebar />
 
       {/* Main Content */}
       <div style={{ marginLeft: "260px", padding: "40px", color: "white", width: "100%" }}>
-
-        <div className="dashboard-header">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px' }}>
           <div>
-            <h1 className="dashboard-title">Dashboard</h1>
-            <p className="dashboard-user">Welcome {user?.email}</p>
+            <h1 style={{ fontSize: '2.5rem', marginBottom: '10px', color: '#ffffff' }}>Dashboard</h1>
+            <p style={{ color: '#94a3b8', fontSize: '1.1rem' }}>Welcome {user?.email}</p>
           </div>
-          <button className="logout-btn" onClick={handleLogout}>
+          <button style={{ padding: '12px 24px', background: '#ef4444', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '16px' }} onClick={handleLogout}>
             Logout
           </button>
         </div>
 
-        <div className="dashboard-grid">
-
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr)', gap: '20px', marginBottom: '40px' }}>
           <div
-            className="dashboard-card"
+            style={{ padding: '30px', background: 'linear-gradient(145deg, #1e293b, #334155)', borderRadius: '20px', cursor: 'pointer', border: '1px solid #475569', transition: 'transform 0.3s ease' }}
+            onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-5px)'}
+            onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
             onClick={() => navigate("/add-asset")}
           >
-            <h3>Add Asset</h3>
-            <p>Store your digital credentials securely</p>
+            <h3 style={{ color: '#10b981', marginBottom: '10px' }}>Add Asset</h3>
+            <p style={{ color: '#94a3b8' }}>Store your digital credentials securely</p>
           </div>
 
           <div
-            className="dashboard-card"
+            style={{ padding: '30px', background: 'linear-gradient(145deg, #1e293b, #334155)', borderRadius: '20px', cursor: 'pointer', border: '1px solid #475569', transition: 'transform 0.3s ease' }}
+            onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-5px)'}
+            onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
             onClick={() => navigate("/view-assets")}
           >
-            <h3>View Assets</h3>
-            <p>Access your saved digital assets</p>
+            <h3 style={{ color: '#10b981', marginBottom: '10px' }}>View Assets</h3>
+            <p style={{ color: '#94a3b8' }}>Access your saved digital assets</p>
           </div>
 
           <div
-            className="dashboard-card"
+            style={{ padding: '30px', background: 'linear-gradient(145deg, #1e293b, #334155)', borderRadius: '20px', cursor: 'pointer', border: '1px solid #475569', transition: 'transform 0.3s ease' }}
+            onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-5px)'}
+            onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
             onClick={() => navigate("/nominee")}
           >
-            <h3>Set Nominee</h3>
-            <p>Assign trusted person for access</p>
+            <h3 style={{ color: '#10b981', marginBottom: '10px' }}>Set Nominee</h3>
+            <p style={{ color: '#94a3b8' }}>Assign trusted person for access</p>
           </div>
 
         </div>
 
-        <div className="dashboard-stats">
-          <div className="stat-card">
-            <div className="stat-number">{totalAssets}</div>
-            <div className="stat-label">Total Assets</div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr)', gap: '20px', marginBottom: '40px' }}>
+          <div style={{ padding: '30px', background: 'linear-gradient(145deg, #1e293b, #334155)', borderRadius: '20px', textAlign: 'center', border: '1px solid #475569' }}>
+            <div style={{ fontSize: '3rem', color: '#6366f1', fontWeight: 'bold' }}>{totalAssets}</div>
+            <div style={{ color: '#94a3b8', fontSize: '1rem' }}>Total Assets</div>
           </div>
-          <div className="stat-card">
-            <div className="stat-number">3</div>
-            <div className="stat-label">Categories</div>
+          <div style={{ padding: '30px', background: 'linear-gradient(145deg, #1e293b, #334155)', borderRadius: '20px', textAlign: 'center', border: '1px solid #475569' }}>
+            <div style={{ fontSize: '3rem', color: '#6366f1', fontWeight: 'bold' }}>21</div>
+            <div style={{ color: '#94a3b8', fontSize: '1rem' }}>Categories</div>
           </div>
-          <div className="stat-card">
-            <div className="stat-number">{totalNominees}</div>
-            <div className="stat-label">Nominees Set</div>
+          <div style={{ padding: '30px', background: 'linear-gradient(145deg, #1e293b, #334155)', borderRadius: '20px', textAlign: 'center', border: '1px solid #475569' }}>
+            <div style={{ fontSize: '3rem', color: '#6366f1', fontWeight: 'bold' }}>{totalNominees}</div>
+            <div style={{ color: '#94a3b8', fontSize: '1rem' }}>Nominees Set</div>
           </div>
         </div>
 
-        <div className="dashboard-tips">
-          <h3>Quick Tips to Get Started</h3>
-          <ul>
+        <div style={{ marginBottom: '40px' }}>
+          <h3 style={{ color: '#ffffff', marginBottom: '20px' }}>Quick Tips to Get Started</h3>
+          <ul style={{ color: '#94a3b8', lineHeight: '1.8' }}>
             <li>Start by adding your most important digital assets like passwords and accounts.</li>
             <li>Set up a nominee to ensure your digital legacy is properly managed.</li>
             <li>Regularly review and update your stored information for security.</li>
@@ -123,9 +117,9 @@ function Dashboard() {
         </div>
 
       </div>
-
+      {/* 🤖 AI Vault Assistant */}
+      <VaultAIChatbot />
     </div>
-
   );
 }
 

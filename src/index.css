@@ -1,8 +1,31 @@
+/* Theme CSS Variables */
+:root {
+  --bg-primary: #020617;
+  --bg-secondary: #0f0f23;
+  --bg-card: #1e293b;
+  --bg-glass: rgba(255,255,255,0.05);
+  --text-primary: white;
+  --text-secondary: #94a3b8;
+  --border: #475569;
+  --primary-gradient: linear-gradient(45deg, #6366f1, #8b5cf6);
+  --danger-gradient: linear-gradient(45deg, #ef4444, #dc2626);
+}
+
+[data-theme="dark"] {
+  --bg-primary: #0a0a0f;
+  --bg-secondary: #1a1a2e;
+  --bg-card: #2a2a3e;
+  --bg-glass: rgba(0,0,0,0.4);
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --border: #4b5563;
+}
+
 body{
   margin:0;
   font-family: "Inter", sans-serif;
-  background:#020617;
-  color:white;
+  background:var(--bg-primary);
+  color:var(--text-primary);
 }
 
 /* smooth scrolling */
