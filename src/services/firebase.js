@@ -26,3 +26,13 @@ const functions = getFunctions(app);
 export const sendNomineeVerificationEmail = httpsCallable(functions, "sendNomineeVerificationEmail");
 export const verifyNomineeToken = httpsCallable(functions, "verifyNomineeToken");
 
+export const analyzeVaultQuery = httpsCallable(functions, "analyzeVaultQuery");
+
+export const updateUserPassword = httpsCallable(functions, 'updatePassword');
+export const saveUserSettings = httpsCallable(functions, 'saveUserSettings');
+export const deleteUserAccount = httpsCallable(functions, 'deleteUserAccount');
+export const updateAssetCredentials = httpsCallable(functions, 'updateAssetCredentials');
+export const toggleEmergencyAccess = httpsCallable(functions, 'toggleEmergencyAccess');
+export const resetLastActive = httpsCallable(functions, 'resetLastActive');
+export const cancelEmergency = httpsCallable(functions, 'cancelEmergency');
+
