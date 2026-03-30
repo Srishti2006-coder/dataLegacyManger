@@ -11,6 +11,46 @@ function Vault() {
   const [assets, setAssets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState({});
+
+  const [toast, setToast] = useState('');
+
+  const styles = {
+    passwordSection: {
+      margin: '16px 0',
+      padding: '16px',
+      background: 'rgba(239, 68, 68, 0.05)',
+      borderRadius: '12px',
+      borderLeft: '4px solid #ef4444'
+    },
+    passwordToggle: {
+      position: 'absolute',
+      right: '12px',
+      top: '50%',
+      transform: 'translateY(-50%)',
+      background: 'rgba(99, 102, 241, 0.2)',
+      color: '#6366f1',
+      border: 'none',
+      padding: '4px 8px',
+      borderRadius: '6px',
+      cursor: 'pointer',
+      fontSize: '1.1rem'
+    },
+    copyButton: {
+      position: 'absolute',
+      right: '44px',
+      top: '50%',
+      transform: 'translateY(-50%)',
+      background: 'rgba(16, 185, 129, 0.2)',
+      color: '#10b981',
+      border: 'none',
+      padding: '4px 8px',
+      borderRadius: '4px',
+      cursor: 'pointer',
+      fontSize: '1rem'
+    },
+
+  };
 
   useEffect(() => {
     if (!user) {
@@ -44,6 +84,43 @@ function Vault() {
     return () => unsubscribe();
   }, [user, navigate]);
 
+  const togglePassword = (assetId) => {
+    setShowPassword(prev => ({
+      ...prev,
+      [assetId]: !prev[assetId]
+    }));
+  };
+
+
+
+  const copyCredentials = async (text) => {
+    if (!text || text === '[No Credentials]' || text === '[Decryption Failed]') return;
+    try {
+      await navigator.clipboard.writeText(text);
+setToast('[OK] Copied!');
+      setTimeout(() => setToast(''), 2000);
+    } catch {
+      setToast('❌ Copy failed');
+      setTimeout(() => setToast(''), 2000);
+    }
+  };
+
+  const getDecryptedCredentials = (asset) => {
+    const userEmail = user?.email || '';
+    if (asset.encryptedCredentials) {
+      return decryptField(asset.encryptedCredentials, userEmail);
+    } else if (asset.fields) {
+      const passwordField = asset.fields.find(f => 
+        f.fieldName.toLowerCase().includes('password') || 
+        f.fieldName.toLowerCase().includes('credentials')
+      );
+      return passwordField ? decryptField(passwordField.encryptedValue, userEmail) : '[No Credentials]';
+    }
+    return '[No Credentials]';
+  };
+
+
+
   const getCategoryIcon = (category) => {
     const icons = {
       password: "🔐",
@@ -54,7 +131,6 @@ function Vault() {
       cloud: "☁️",
       streaming: "🎬",
       shopping: "🛒",
-      // Add more as needed
     };
     return icons[category] || "📦";
   };
@@ -105,8 +181,10 @@ function Vault() {
           ) : (
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(350px, 1fr))", gap: "20px" }}>
               {assets.map((asset) => {
-                const decryptedPassword = decryptField(asset.encryptedPassword, user.email);
-                const decryptedNotes = decryptField(asset.encryptedNotes, user.email);
+                const decryptedCredentials = getDecryptedCredentials(asset);
+
+                const isShowing = showPassword[asset.id];
+                const masked = decryptedCredentials.length > 0 ? '•'.repeat(Math.max(decryptedCredentials.length, 8)) : '[No Credentials]';
 
                 return (
                   <div key={asset.id} style={{
@@ -130,6 +208,38 @@ function Vault() {
                       <span style={{ fontSize: "1.5rem", marginRight: "12px" }}>
                         {getCategoryIcon(asset.category)}
                       </span>
+                      <div style={styles.passwordSection}>
+                        <label style={{ display: "block", marginBottom: "8px", color: "#cbd5e1", fontWeight: "500" }}>🔐 Credentials</label>
+                        <div style={{ position: 'relative' }}>
+                          <span style={{
+                            background: "#1a1a2e",
+                            padding: "12px 16px",
+                            borderRadius: "8px",
+                            border: "1px solid #475569",
+                            fontFamily: "monospace",
+                            fontSize: "14px",
+                            color: "#e2e8f0",
+                            wordBreak: "break-all",
+                            display: 'block'
+                          }}>
+                            {isShowing ? decryptedCredentials : masked}
+                          </span>
+                          <button
+                            style={styles.passwordToggle}
+                            onClick={() => togglePassword(asset.id)}
+                            title={isShowing ? 'Hide' : 'Show'}
+                          >
+                            {isShowing ? '🙈' : '👁️'}
+                          </button>
+                          <button
+                            style={styles.copyButton}
+                            onClick={() => copyCredentials(decryptedCredentials)}
+                            title="Copy"
+                          >
+                            📋
+                          </button>
+                        </div>
+                      </div>
                       <div>
                         <h3 style={{ margin: "0 0 5px 0", color: "white", fontSize: "1.3rem" }}>
                           {asset.title}
@@ -140,7 +250,7 @@ function Vault() {
                       </div>
                     </div>
 
-                    {decryptedPassword !== '[Decryption Failed]' && (
+                    {decryptedCredentials !== '[Decryption Failed]' && decryptedCredentials !== '[No Credentials]' && (
                       <div style={{ marginBottom: "15px" }}>
                         <label style={{ display: "block", marginBottom: "5px", color: "#cbd5e1", fontWeight: "500", fontSize: "0.9rem" }}>Password</label>
                         <div style={{
@@ -153,27 +263,12 @@ function Vault() {
                           color: "#10b981",
                           wordBreak: "break-all"
                         }}>
-                          {decryptedPassword}
+                          {decryptedCredentials}
                         </div>
                       </div>
                     )}
 
-                    {decryptedNotes !== '[Decryption Failed]' && decryptedNotes && (
-                      <div>
-                        <label style={{ display: "block", marginBottom: "5px", color: "#cbd5e1", fontWeight: "500", fontSize: "0.9rem" }}>Notes</label>
-                        <div style={{
-                          background: "#1a1a2e",
-                          padding: "12px",
-                          borderRadius: "8px",
-                          border: "1px solid #475569",
-                          color: "#e2e8f0",
-                          fontSize: "14px",
-                          lineHeight: "1.5"
-                        }}>
-                          {decryptedNotes}
-                        </div>
-                      </div>
-                    )}
+
 
                     <div style={{ marginTop: "20px", fontSize: "0.8rem", color: "#64748b" }}>
                       Category: <span style={{ color: "#6366f1" }}>{asset.category}</span> | 
@@ -182,6 +277,21 @@ function Vault() {
                   </div>
                 );
               })}
+            </div>
+          )}
+          {toast && (
+            <div style={{
+              position: 'fixed',
+              top: '20px',
+              right: '20px',
+              background: toast.includes('✅') ? '#10b981' : '#ef4444',
+              color: 'white',
+              padding: '12px 20px',
+              borderRadius: '8px',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+              zIndex: 1000
+            }}>
+              {toast}
             </div>
           )}
         </div>

@@ -1,5 +1,6 @@
 
 import Sidebar from "../layout/Sidebar";
+import AIAssistant from "../components/AIAssistant";
 import { auth, db } from "../services/firebase";
 import { useNavigate } from "react-router-dom";
 import { signOut } from "firebase/auth";
@@ -124,8 +125,10 @@ function Dashboard() {
 
       </div>
 
-    </div>
+        {/* AI Assistant */}
+        <AIAssistant />
 
+    </div>
   );
 }
 

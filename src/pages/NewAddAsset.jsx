@@ -13,7 +13,7 @@ function AddAsset() {
   const [identifier, setIdentifier] = useState('');
   const [credentials, setCredentials] = useState('');
   const [showCredentials, setShowCredentials] = useState(false);
-  // Note fields removed for professional look
+// Note fields removed for professional look
   const [tags, setTags] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -36,6 +36,7 @@ function AddAsset() {
 
     try {
       const encryptedCredentials = encryptField(credentials, auth.currentUser?.email || '');
+
       
       await addDoc(collection(db, 'assets'), {
         userId: auth.currentUser?.uid,
@@ -46,14 +47,14 @@ function AddAsset() {
         createdAt: serverTimestamp()
       });
 
-setSuccess('[OK] Asset saved securely!');
+setSuccess('Asset saved securely!');
       setTimeout(() => {
         // Reset form
         setTitle('');
         setIdentifier('');
         setCredentials('');
-        // setNote removed
-            // setShowNote removed
+
+        setShowCredentials(false);
         setTags([]);
         navigate('/view-assets');
       }, 1500);
@@ -62,7 +63,7 @@ setSuccess('[OK] Asset saved securely!');
     } finally {
       setLoading(false);
     }
-}, [title, identifier, credentials, tags, navigate]);
+  }, [title, identifier, credentials, tags, navigate]);
 
   const handleCancel = () => {
     navigate('/view-assets');
@@ -78,7 +79,7 @@ setSuccess('[OK] Asset saved securely!');
             <p className="add-asset-subtitle">Store sensitive information securely</p>
           </div>
 
-          <p className="security-notice">
+            <p className="security-notice">
             Your data is encrypted and stored securely.
           </p>
 
@@ -128,7 +129,7 @@ setSuccess('[OK] Asset saved securely!');
             </div>
           </div>
 
-          {/* Note section removed for professional credentials-only form */}
+            {/* Note section removed for professional credentials-only form */}
 
           {/* Tags */}
           <div className="form-group tag-group">

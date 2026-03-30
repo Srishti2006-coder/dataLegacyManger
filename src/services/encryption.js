@@ -1,11 +1,11 @@
 import CryptoJS from 'crypto-js';
 
-const SALT = 'DataLegacySalt2024!'; // Fixed salt for demo (use random per-user in prod)
+const SALT = 'DataLegacySalt2024Secure!@#'; // Improved fixed salt
 
 export const deriveKey = (userEmail) => {
   return CryptoJS.PBKDF2(userEmail + SALT, SALT, {
     keySize: 256/32,
-    iterations: 1000
+    iterations: 10000 // Increased for better security
   }).toString();
 };
 

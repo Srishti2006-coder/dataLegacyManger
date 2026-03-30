@@ -1,6 +1,8 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { auth, db } from "../services/firebase";
+import { decryptField } from "../services/encryption";
 import { collection, getDocs, query, where, deleteDoc, doc, updateDoc } from "firebase/firestore";
+import './ViewAssets.css';
 import Sidebar from "../layout/Sidebar";
 import { useNavigate } from "react-router-dom";
 
@@ -11,31 +13,12 @@ function ViewAssets() {
   const [loading, setLoading] = useState(true);
   const [editingNominee, setEditingNominee] = useState(null);
   const [editForm, setEditForm] = useState({ name: "", email: "", relationship: "", phone: "" });
-
-  const categories = [
-    { value: "password", label: "Password/Credentials", icon: "🔐" },
-    { value: "email", label: "Email Accounts", icon: "📧" },
-    { value: "financial", label: "Banking & Finance", icon: "🏦" },
-    { value: "crypto", label: "Cryptocurrency & Wallets", icon: "₿" },
-    { value: "social", label: "Social Media", icon: "📱" },
-    { value: "cloud", label: "Cloud Storage", icon: "☁️" },
-    { value: "streaming", label: "Streaming Services", icon: "🎬" },
-    { value: "shopping", label: "Shopping & Retail", icon: "🛒" },
-    { value: "professional", label: "Professional & Work", icon: "💼" },
-    { value: "health", label: "Health & Medical", icon: "🏥" },
-    { value: "government", label: "Government & Tax", icon: "🏛️" },
-    { value: "gaming", label: "Gaming Accounts", icon: "🎮" },
-    { value: "communication", label: "Communication", icon: "💬" },
-    { value: "security", label: "Security & 2FA", icon: "🛡️" },
-    { value: "insurance", label: "Insurance", icon: "📋" },
-    { value: "real-estate", label: "Real Estate", icon: "🏠" },
-    { value: "education", label: "Education", icon: "🎓" },
-    { value: "travel", label: "Travel & Loyalty", icon: "✈️" },
-    { value: "utilities", label: "Utilities", icon: "⚡" },
-    { value: "subscriptions", label: "Subscriptions", icon: "📺" },
-    { value: "personal", label: "Personal Documents", icon: "📄" },
-    { value: "other", label: "Other", icon: "📦" }
-  ];
+  const [showPassword, setShowPassword] = useState({});
+  const [toast, setToast] = useState('');
+  const [activeTab, setActiveTab] = useState('assets');
+  const [searchQuery, setSearchQuery] = useState('');
+  // expandedAsset state removed for stable layout
+  // categories removed for clean UI
 
   useEffect(() => {
     fetchData();
@@ -45,7 +28,6 @@ function ViewAssets() {
     if (!auth.currentUser) return;
     setLoading(true);
     try {
-      // Fetch assets
       const assetsQuery = query(
         collection(db, "assets"),
         where("userId", "==", auth.currentUser.uid)
@@ -53,7 +35,19 @@ function ViewAssets() {
       const assetsSnapshot = await getDocs(assetsQuery);
       const assetsData = assetsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-      // Fetch nominees
+      const userEmail = auth.currentUser?.email || '';
+      const processedAssets = assetsData.map(asset => {
+        let decryptedCredentials = '[No Credentials]';
+        if (asset.encryptedCredentials) {
+          decryptedCredentials = decryptField(asset.encryptedCredentials, userEmail);
+        }
+        return { ...asset, decryptedCredentials };
+      }).sort((a, b) => {
+        const dateA = a.createdAt?.seconds ? new Date(a.createdAt.seconds * 1000) : new Date(0);
+        const dateB = b.createdAt?.seconds ? new Date(b.createdAt.seconds * 1000) : new Date(0);
+        return dateB - dateA; // descending by added date
+      });
+
       const nomineesQuery = query(
         collection(db, "nominees"),
         where("userId", "==", auth.currentUser.uid)
@@ -61,10 +55,7 @@ function ViewAssets() {
       const nomineesSnapshot = await getDocs(nomineesQuery);
       const nomineesData = nomineesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-      console.log("Loaded assets:", assetsData);
-      console.log("Loaded nominees:", nomineesData);
-
-      setAssets(assetsData);
+      setAssets(processedAssets);
       setNominees(nomineesData);
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -73,8 +64,31 @@ function ViewAssets() {
     }
   };
 
-  const getCategoryInfo = (categoryValue) => {
-    return categories.find(cat => cat.value === categoryValue) || categories.find(cat => cat.value === "other");
+  const filteredAssets = assets.filter(asset =>
+    asset.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    asset.identifier?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (asset.tags && asset.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase())))
+  );
+
+  const togglePassword = (assetId) => {
+    setShowPassword(prev => ({
+      ...prev,
+      [assetId]: !prev[assetId]
+    }));
+  };
+
+
+
+  const copyCredentials = async (text) => {
+    if (!text || text === '[No Credentials]' || text === '[Decryption Failed]') return;
+    try {
+      await navigator.clipboard.writeText(text);
+setToast('[OK] Copied to clipboard!');
+      setTimeout(() => setToast(''), 2000);
+    } catch (err) {
+      setToast('❌ Copy failed');
+      setTimeout(() => setToast(''), 2000);
+    }
   };
 
   const handleEditNominee = (nominee) => {
@@ -92,7 +106,6 @@ function ViewAssets() {
       alert("Please fill in all required fields");
       return;
     }
-
     try {
       await updateDoc(doc(db, "nominees", editingNominee), {
         ...editForm,
@@ -100,10 +113,10 @@ function ViewAssets() {
       });
       setEditingNominee(null);
       setEditForm({ name: "", email: "", relationship: "", phone: "" });
-      fetchData(); // Refresh data
-      alert("Nominee updated successfully!");
+      fetchData();
+setToast('[OK] Nominee updated successfully!');
     } catch (error) {
-      alert("Error updating nominee: " + error.message);
+      setToast('❌ Error updating nominee: ' + error.message);
     }
   };
 
@@ -111,10 +124,10 @@ function ViewAssets() {
     if (window.confirm("Are you sure you want to delete this nominee?")) {
       try {
         await deleteDoc(doc(db, "nominees", nomineeId));
-        fetchData(); // Refresh data
-        alert("Nominee deleted successfully!");
+        fetchData();
+setToast('[OK] Nominee deleted successfully!');
       } catch (error) {
-        alert("Error deleting nominee: " + error.message);
+        setToast('❌ Error deleting nominee: ' + error.message);
       }
     }
   };
@@ -126,11 +139,11 @@ function ViewAssets() {
 
   if (loading) {
     return (
-      <div style={styles.container}>
+      <div className="view-assets-container">
         <Sidebar />
-        <div style={styles.main}>
-          <div style={{ textAlign: "center", padding: "50px" }}>
-            <div style={{ fontSize: "2rem", marginBottom: "20px" }}>⏳</div>
+        <div className="view-assets-main">
+          <div className="empty-state">
+            <div className="empty-icon">⏳</div>
             <p>Loading your digital legacy...</p>
           </div>
         </div>
@@ -139,426 +152,258 @@ function ViewAssets() {
   }
 
   return (
-    <div style={styles.container}>
+    <div className="view-assets-container">
       <Sidebar />
+      <div className="view-assets-main">
+        {toast && <div className="toast">{toast}</div>}
 
-      <div style={styles.main}>
-        <div style={styles.header}>
-          <h1 style={styles.title}>Your Digital Legacy</h1>
-          <p style={styles.subtitle}>All your important information in one secure place</p>
+        <div className="view-assets-header">
+          <h1 className="view-assets-title">Your Digital Legacy</h1>
+          <p className="view-assets-subtitle">All your important information in one secure place • Passwords masked by default</p>
         </div>
 
-        {/* User Information Section */}
-        <div style={styles.userSection}>
-          <h2 style={styles.sectionTitle}>👤 Owner Information</h2>
-          <div style={styles.userCard}>
-            <div style={styles.userInfo}>
-              <h3>Srishti's Digital Assets</h3>
-              <p>Email: {auth.currentUser?.email}</p>
-              <p>Assets: {assets.length} | Nominees: {nominees.length}</p>
-            </div>
+        {activeTab === 'assets' && (
+          <div className="search-container">
+            <div className="search-icon">🔍</div>
+            <input
+              type="text"
+              className="search-input"
+              placeholder="Search assets by title, identifier or tags..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
           </div>
+        )}
+
+        <div className="tabs">
+          <button 
+            className={`tab ${activeTab === 'assets' ? 'active' : ''}`}
+            onClick={() => setActiveTab('assets')}
+          >
+            Assets ({assets.length})
+          </button>
+          <button 
+            className={`tab ${activeTab === 'nominees' ? 'active' : ''}`}
+            onClick={() => setActiveTab('nominees')}
+          >
+            Nominees ({nominees.length})
+          </button>
+          <button 
+            className={`tab ${activeTab === 'summary' ? 'active' : ''}`}
+            onClick={() => setActiveTab('summary')}
+          >
+            Summary
+          </button>
         </div>
 
-        {/* Assets Section */}
-        <div style={styles.section}>
-          <h2 style={styles.sectionTitle}>📁 Your Assets ({assets.length})</h2>
-          {assets.length === 0 ? (
-            <div style={styles.emptyState}>
-              <div style={{ fontSize: "3rem", marginBottom: "20px" }}>📦</div>
-              <p>No assets added yet.</p>
-              <button
-                style={styles.addButton}
-                onClick={() => navigate("/add-asset")}
-              >
-                Add Your First Asset
-              </button>
-            </div>
-          ) : (
-            <div style={styles.assetsGrid}>
-              {assets.map((asset) => {
-                const categoryInfo = getCategoryInfo(asset.category);
-                return (
-                  <div key={asset.id} style={styles.assetCard}>
-                    <div style={styles.assetHeader}>
-                      <span style={styles.categoryIcon}>{categoryInfo.icon}</span>
-                      <h3 style={styles.assetTitle}>{asset.title}</h3>
-                    </div>
-                    <div style={styles.assetCategory}>
-                      {categoryInfo.label}
-                    </div>
-                    <div style={styles.assetDetails}>
-                      <div style={styles.detailRow}>
-                        <span style={styles.detailLabel}>👤 Username:</span>
-                        <span style={styles.detailValue}>{asset.username}</span>
+        {activeTab === 'assets' && (
+          <div className="view-assets-section">
+            <h2 className="view-assets-section-title">
+              Your Assets ({filteredAssets.length} of {assets.length})
+            </h2>
+            
+            {filteredAssets.length === 0 ? (
+              <div className="empty-state">
+                <div className="empty-icon">📦</div>
+                <p>{searchQuery ? 'No assets match your search.' : 'No assets yet.'}</p>
+                {searchQuery && (
+                  <button className="btn btn-primary" onClick={() => setSearchQuery('')}>
+                    Clear Search
+                  </button>
+                )}
+              </div>
+            ) : (
+              <div className="assets-grid">
+                {filteredAssets.map((asset) => {
+                  const isShowingPassword = showPassword[asset.id];
+
+                  return (
+                    <div 
+                      key={asset.id} 
+                      className="asset-card"
+                    >
+                      <div className="asset-header">
+                        <div className="asset-content">
+                          <h3 className="asset-title">{asset.title}</h3>
+                          <div className="asset-tags">
+                            {asset.tags?.map((tag, idx) => (
+                              <span key={idx} className="tag-chip" style={{ backgroundColor: getTagColor(tag) }}>
+                                {tag}
+                              </span>
+                            ))}
+                          </div>
+                          <div className="asset-header-details">
+                            <div className="detail-row">
+                              <span className="detail-label">ID:</span>
+                              <span className="detail-value">{asset.identifier || 'N/A'}</span>
+                            </div>
+                          </div>
+                          
+                          <div className="creds-row">
+                            <span className="detail-label">Password / Credentials:</span>
+                            <span className="detail-value password-display">
+                              {isShowingPassword
+                                ? asset.decryptedCredentials
+                                : '......'
+                              }
+                            </span>
+                            <button
+                              className="btn btn-success password-toggle"
+                              onClick={(e) => { e.stopPropagation(); togglePassword(asset.id); }}
+                              title={isShowingPassword ? 'Hide' : 'Show'}
+                            >
+                              {isShowingPassword ? '🙈' : '👁️'}
+                            </button>
+                            <button
+                              className="btn btn-success"
+                              onClick={(e) => { e.stopPropagation(); copyCredentials(asset.decryptedCredentials); }}
+                              title="Copy to clipboard"
+                            >
+                              📋
+                            </button>
+
+                          </div>
+                          
+                          <div className="asset-meta">
+                            <small>Added: {asset.createdAt?.toDate?.()?.toLocaleDateString() || "Recently"}</small>
+                          </div>
+                        </div>
                       </div>
-                      {asset.password && (
-                        <div style={styles.detailRow}>
-                          <span style={styles.detailLabel}>🔑 Password/Info:</span>
-                          <span style={styles.detailValue}>{asset.password}</span>
-                        </div>
-                      )}
-                      {asset.notes && (
-                        <div style={styles.detailRow}>
-                          <span style={styles.detailLabel}>📝 Notes:</span>
-                          <span style={styles.detailValue}>{asset.notes}</span>
-                        </div>
-                      )}
                     </div>
-                    <div style={styles.assetMeta}>
-                      <small>Added: {asset.createdAt?.toDate?.()?.toLocaleDateString() || "Recently"}</small>
-                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === 'nominees' && (
+          <div className="view-assets-section">
+            <h2 className="view-assets-section-title">Your Nominees ({nominees.length})</h2>
+            {nominees.length === 0 ? (
+              <div className="empty-state">
+                <div className="empty-icon">👤</div>
+                <p>No nominees added yet.</p>
+                <button className="btn btn-primary" onClick={() => navigate("/nominee")}>
+                  ➕ Add Trusted Nominees
+                </button>
+              </div>
+            ) : (
+              <div className="nominees-grid">
+                {nominees.map((nominee) => (
+                  <div key={nominee.id} className="nominee-card">
+                    {editingNominee === nominee.id ? (
+                      <div className="edit-form">
+                        <h3>Edit Nominee</h3>
+                        <input
+                          type="text"
+                          className="edit-input"
+                          placeholder="Full Name *"
+                          value={editForm.name}
+                          onChange={(e) => setEditForm({...editForm, name: e.target.value})}
+                        />
+                        <input
+                          type="email"
+                          className="edit-input"
+                          placeholder="Email *"
+                          value={editForm.email}
+                          onChange={(e) => setEditForm({...editForm, email: e.target.value})}
+                        />
+                        <input
+                          type="text"
+                          className="edit-input"
+                          placeholder="Relationship *"
+                          value={editForm.relationship}
+                          onChange={(e) => setEditForm({...editForm, relationship: e.target.value})}
+                        />
+                        <input
+                          type="tel"
+                          className="edit-input"
+                          placeholder="Phone (optional)"
+                          value={editForm.phone}
+                          onChange={(e) => setEditForm({...editForm, phone: e.target.value})}
+                        />
+                        <div className="edit-buttons">
+                          <button className="btn btn-save" onClick={handleUpdateNominee}>💾 Save</button>
+                          <button className="btn btn-cancel" onClick={handleCancelEdit}>❌ Cancel</button>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="nominee-header">
+                          <h3>{nominee.name}</h3>
+                          <div className="nominee-actions">
+                            <button className="btn btn-secondary btn-small" onClick={() => handleEditNominee(nominee)}>
+                              ✏️ Edit
+                            </button>
+                            <button className="btn btn-danger btn-small" onClick={() => handleDeleteNominee(nominee.id)}>
+                              🗑️ Delete
+                            </button>
+                          </div>
+                        </div>
+                        <div className="nominee-details">
+                          <div className="detail-row">
+                            <span className="detail-label">📧 Email:</span>
+                            <span className="detail-value">{nominee.email}</span>
+                          </div>
+                          <div className="detail-row">
+                            <span className="detail-label">👨‍👩‍👧‍👦 Relationship:</span>
+                            <span className="detail-value">{nominee.relationship}</span>
+                          </div>
+                          {nominee.phone && (
+                            <div className="detail-row">
+                              <span className="detail-label">📞 Phone:</span>
+                              <span className="detail-value">{nominee.phone}</span>
+                            </div>
+                          )}
+                        </div>
+                      </>
+                    )}
                   </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
-        {/* Nominees Section */}
-        <div style={styles.section}>
-          <h2 style={styles.sectionTitle}>👥 Your Nominees ({nominees.length})</h2>
-          {nominees.length === 0 ? (
-            <div style={styles.emptyState}>
-              <div style={{ fontSize: "3rem", marginBottom: "20px" }}>👤</div>
-              <p>No nominees added yet.</p>
-              <button
-                style={styles.addButton}
-                onClick={() => navigate("/nominee")}
-              >
-                Add Trusted Nominees
-              </button>
-            </div>
-          ) : (
-            <div style={styles.nomineesGrid}>
-              {nominees.map((nominee) => (
-                <div key={nominee.id} style={styles.nomineeCard}>
-                  {editingNominee === nominee.id ? (
-                    // Edit Mode
-                    <div style={styles.editForm}>
-                      <h4>Edit Nominee</h4>
-                      <input
-                        type="text"
-                        placeholder="Full Name"
-                        value={editForm.name}
-                        onChange={(e) => setEditForm({...editForm, name: e.target.value})}
-                        style={styles.editInput}
-                      />
-                      <input
-                        type="email"
-                        placeholder="Email"
-                        value={editForm.email}
-                        onChange={(e) => setEditForm({...editForm, email: e.target.value})}
-                        style={styles.editInput}
-                      />
-                      <input
-                        type="text"
-                        placeholder="Relationship"
-                        value={editForm.relationship}
-                        onChange={(e) => setEditForm({...editForm, relationship: e.target.value})}
-                        style={styles.editInput}
-                      />
-                      <input
-                        type="tel"
-                        placeholder="Phone (optional)"
-                        value={editForm.phone}
-                        onChange={(e) => setEditForm({...editForm, phone: e.target.value})}
-                        style={styles.editInput}
-                      />
-                      <div style={styles.editButtons}>
-                        <button onClick={handleUpdateNominee} style={styles.saveButton}>Save</button>
-                        <button onClick={handleCancelEdit} style={styles.cancelButton}>Cancel</button>
-                      </div>
-                    </div>
-                  ) : (
-                    // View Mode
-                    <>
-                      <div style={styles.nomineeHeader}>
-                        <h3>{nominee.name}</h3>
-                        <div style={styles.nomineeActions}>
-                          <button
-                            onClick={() => handleEditNominee(nominee)}
-                            style={styles.editButton}
-                          >
-                            ✏️ Edit
-                          </button>
-                          <button
-                            onClick={() => handleDeleteNominee(nominee.id)}
-                            style={styles.deleteButton}
-                          >
-                            🗑️ Delete
-                          </button>
-                        </div>
-                      </div>
-                      <div style={styles.nomineeDetails}>
-                        <p>📧 {nominee.email}</p>
-                        <p>👨‍👩‍👧‍👦 {nominee.relationship}</p>
-                        {nominee.phone && <p>📞 {nominee.phone}</p>}
-                      </div>
-                    </>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Summary Section */}
-        <div style={styles.summarySection}>
-          <h2 style={styles.sectionTitle}>📊 Legacy Summary</h2>
-          <div style={styles.summaryCard}>
-            <div style={styles.summaryItem}>
-              <span style={styles.summaryNumber}>{assets.length}</span>
-              <span style={styles.summaryLabel}>Digital Assets</span>
-            </div>
-            <div style={styles.summaryItem}>
-              <span style={styles.summaryNumber}>{nominees.length}</span>
-              <span style={styles.summaryLabel}>Trusted Nominees</span>
-            </div>
-            <div style={styles.summaryItem}>
-              <span style={styles.summaryNumber}>
-                {new Set(assets.map(a => a.category)).size}
-              </span>
-              <span style={styles.summaryLabel}>Categories</span>
+        {activeTab === 'summary' && (
+          <div className="view-assets-section">
+            <h2 className="view-assets-section-title">Legacy Summary</h2>
+            <div className="summary-grid">
+              <div className="summary-item">
+                <span className="summary-number">{assets.length}</span>
+                <span className="summary-label">Digital Assets</span>
+              </div>
+              <div className="summary-item">
+                <span className="summary-number">{nominees.length}</span>
+                <span className="summary-label">Trusted Nominees</span>
+              </div>
+              <div className="summary-item">
+                <span className="summary-number">{new Set(assets.map(a => a.category || (a.tags && a.tags[0]) || 'other')).size}</span>
+                <span className="summary-label">Categories</span>
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
 }
 
-const styles = {
-  container: {
-    display: "flex",
-    background: "linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%)",
-    minHeight: "100vh",
-    color: "white"
-  },
-  main: {
-    marginLeft: "260px",
-    padding: "40px",
-    width: "100%"
-  },
-  header: {
-    textAlign: "center",
-    marginBottom: "40px"
-  },
-  title: {
-    fontSize: "2.5rem",
-    marginBottom: "10px",
-    textShadow: "0 0 20px rgba(99, 102, 241, 0.5)"
-  },
-  subtitle: {
-    color: "#94a3b8",
-    fontSize: "1.1rem"
-  },
-  userSection: {
-    marginBottom: "40px"
-  },
-  sectionTitle: {
-    fontSize: "1.8rem",
-    marginBottom: "20px",
-    color: "#6366f1",
-    borderBottom: "2px solid #6366f1",
-    paddingBottom: "10px"
-  },
-  userCard: {
-    background: "linear-gradient(145deg, #1e293b, #334155)",
-    borderRadius: "15px",
-    padding: "25px",
-    border: "1px solid #475569",
-    boxShadow: "0 10px 30px rgba(0,0,0,0.3)"
-  },
-  userInfo: {
-    textAlign: "center"
-  },
-  section: {
-    marginBottom: "40px"
-  },
-  emptyState: {
-    textAlign: "center",
-    padding: "60px 20px",
-    background: "linear-gradient(145deg, #1e293b, #334155)",
-    borderRadius: "15px",
-    border: "1px solid #475569"
-  },
-  addButton: {
-    background: "linear-gradient(45deg, #6366f1, #8b5cf6)",
-    color: "white",
-    border: "none",
-    padding: "12px 25px",
-    borderRadius: "8px",
-    cursor: "pointer",
-    fontSize: "16px",
-    marginTop: "20px",
-    transition: "transform 0.3s ease"
-  },
-  assetsGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fill, minmax(400px, 1fr))",
-    gap: "20px"
-  },
-  assetCard: {
-    background: "linear-gradient(145deg, #1e293b, #334155)",
-    borderRadius: "15px",
-    padding: "25px",
-    border: "1px solid #475569",
-    boxShadow: "0 10px 30px rgba(0,0,0,0.3)",
-    transition: "transform 0.3s ease"
-  },
-  assetHeader: {
-    display: "flex",
-    alignItems: "center",
-    marginBottom: "15px"
-  },
-  categoryIcon: {
-    fontSize: "24px",
-    marginRight: "10px"
-  },
-  assetTitle: {
-    fontSize: "1.4rem",
-    margin: 0,
-    color: "#6366f1"
-  },
-  assetCategory: {
-    background: "#475569",
-    padding: "5px 12px",
-    borderRadius: "20px",
-    fontSize: "0.9rem",
-    display: "inline-block",
-    marginBottom: "20px"
-  },
-  assetDetails: {
-    marginBottom: "15px"
-  },
-  detailRow: {
-    display: "flex",
-    marginBottom: "8px",
-    alignItems: "flex-start"
-  },
-  detailLabel: {
-    minWidth: "120px",
-    fontWeight: "bold",
-    color: "#cbd5e1",
-    fontSize: "0.9rem"
-  },
-  detailValue: {
-    flex: 1,
-    color: "#e2e8f0",
-    wordBreak: "break-word"
-  },
-  assetMeta: {
-    borderTop: "1px solid #475569",
-    paddingTop: "10px",
-    textAlign: "right"
-  },
-  nomineesGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fill, minmax(350px, 1fr))",
-    gap: "20px"
-  },
-  nomineeCard: {
-    background: "linear-gradient(145deg, #1e293b, #334155)",
-    borderRadius: "15px",
-    padding: "25px",
-    border: "1px solid #475569",
-    boxShadow: "0 10px 30px rgba(0,0,0,0.3)"
-  },
-  nomineeHeader: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: "15px"
-  },
-  nomineeActions: {
-    display: "flex",
-    gap: "10px"
-  },
-  editButton: {
-    background: "#f59e0b",
-    color: "white",
-    border: "none",
-    padding: "6px 12px",
-    borderRadius: "6px",
-    cursor: "pointer",
-    fontSize: "14px"
-  },
-  deleteButton: {
-    background: "#ef4444",
-    color: "white",
-    border: "none",
-    padding: "6px 12px",
-    borderRadius: "6px",
-    cursor: "pointer",
-    fontSize: "14px"
-  },
-  nomineeDetails: {
-    color: "#e2e8f0"
-  },
-  editForm: {
-    textAlign: "center"
-  },
-  editInput: {
-    width: "100%",
-    padding: "10px",
-    margin: "8px 0",
-    borderRadius: "6px",
-    border: "1px solid #475569",
-    background: "#1a1a2e",
-    color: "white",
-    fontSize: "14px"
-  },
-  editButtons: {
-    display: "flex",
-    gap: "10px",
-    marginTop: "15px"
-  },
-  saveButton: {
-    flex: 1,
-    background: "#10b981",
-    color: "white",
-    border: "none",
-    padding: "10px",
-    borderRadius: "6px",
-    cursor: "pointer"
-  },
-  cancelButton: {
-    flex: 1,
-    background: "#6b7280",
-    color: "white",
-    border: "none",
-    padding: "10px",
-    borderRadius: "6px",
-    cursor: "pointer"
-  },
-  summarySection: {
-    marginTop: "50px"
-  },
-  summaryCard: {
-    background: "linear-gradient(145deg, #1e293b, #334155)",
-    borderRadius: "15px",
-    padding: "30px",
-    border: "1px solid #475569",
-    boxShadow: "0 10px 30px rgba(0,0,0,0.3)",
-    display: "flex",
-    justifyContent: "space-around",
-    textAlign: "center"
-  },
-  summaryItem: {
-    display: "flex",
-    flexDirection: "column"
-  },
-  summaryNumber: {
-    fontSize: "2.5rem",
-    fontWeight: "bold",
-    color: "#6366f1"
-  },
-  summaryLabel: {
-    color: "#94a3b8",
-    fontSize: "0.9rem",
-    marginTop: "5px"
-  }
+const getTagColor = (tag) => {
+  const colors = {
+    'Finance': '#10b981', 'Banking': '#10b981',
+    'Work': '#3b82f6', 'Professional': '#3b82f6',
+    'Social': '#8b5cf6',
+    'Education': '#f59e0b',
+    'Health': '#ef4444',
+    'Crypto': '#f97316',
+    'Email': '#06b6d4',
+    'Shopping': '#14b8b4',
+    'Streaming': '#ec4899',
+  };
+  return colors[tag] || '#6366f1';
 };
 
 export default ViewAssets;
+

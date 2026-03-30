@@ -32,8 +32,9 @@ return(
 <Route path="/dashboard" element={<Dashboard />} />
 
 <Route path="/add-asset" element={<AddAsset />} />
-
+<Route path="/new-add-asset" element={<AddAsset />} />
 <Route path="/view-assets" element={<ViewAssets />} />
+<Route path="/new-view-assets" element={<ViewAssets />} />
 
 <Route path="/nominee" element={<Nominee />} />
 

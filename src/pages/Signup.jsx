@@ -78,8 +78,9 @@ return(
           type="button"
           className="password-toggle"
           onClick={() => setShowPassword(!showPassword)}
+          title={showPassword ? "Hide" : "Show"}
         >
-          {showPassword ? "🙈" : "👁️"}
+          {showPassword ? "Hide" : "Show"}
         </button>
       </div>
     </div>
