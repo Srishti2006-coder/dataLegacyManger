@@ -51,13 +51,13 @@ function Dashboard() {
 
   return (
 
-    <div style={{ display: "flex", background: "#020617", minHeight: "100vh" }}>
+    <div className="flex bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 dark:from-white dark:via-slate-50 dark:to-white min-h-screen dark:text-slate-900 text-white">
 
       {/* Sidebar */}
       <Sidebar />
 
       {/* Main Content */}
-      <div style={{ marginLeft: "260px", padding: "40px", color: "white", width: "100%" }}>
+      <div className="ml-[260px] p-10 w-full text-white dark:text-slate-900 bg-slate-900/50 dark:bg-white/50 min-h-[calc(100vh-80px)]">
 
         <div className="dashboard-header">
           <div>

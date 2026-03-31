@@ -12,6 +12,15 @@ function Vault() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState({});
+  const [hideSensitive, setHideSensitive] = useState(false);
+
+  useEffect(() => {
+    const saved = localStorage.getItem('datalegacy-settings');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      setHideSensitive(parsed.hideSensitive || false);
+    }
+  }, []);
 
   // toast state removed - no longer used
 
@@ -61,7 +70,6 @@ function Vault() {
         setLoading(false);
       },
       (err) => {
-        console.error("Error fetching assets:", err);
         setError("Failed to load vault");
         setLoading(false);
       }
@@ -73,7 +81,7 @@ function Vault() {
   const togglePassword = (assetId) => {
     setShowPassword(prev => ({
       ...prev,
-      [assetId]: !prev[assetId]
+      [assetId]: !(prev[assetId] ?? !hideSensitive)
     }));
   };
 
@@ -99,17 +107,16 @@ function Vault() {
 
   const getCategoryIcon = (category) => {
     const icons = {
-      password: "🔐",
-      email: "📧",
-      financial: "🏦",
-      crypto: "₿",
-      social: "📱",
-      cloud: "☁️",
-      streaming: "🎬",
-      shopping: "🛒",
+      "email": "E",
+      "password": "P",
+      "bank": "B",
+      "crypto": "C",
+      "social": "S",
+      "document": "D"
     };
-    return icons[category] || "📦";
+    return icons[category] || "";
   };
+
 
   if (loading) return <div style={{ padding: "40px", marginLeft: "260px", color: "white" }}>Loading vault...</div>;
 
@@ -119,11 +126,12 @@ function Vault() {
       <div style={{ marginLeft: "260px", padding: "40px", width: "100%" }}>
         <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
           <h1 style={{ fontSize: "2.5rem", marginBottom: "10px", textAlign: "center", textShadow: "0 0 20px rgba(99, 102, 241, 0.5)" }}>
-            🔐 Secure Vault
+            Secure Vault
           </h1>
           <p style={{ color: "#94a3b8", textAlign: "center", marginBottom: "40px", fontSize: "1.1rem" }}>
             Your encrypted digital legacy. All sensitive data is client-side decrypted.
           </p>
+
 
           {error && (
             <div style={{ background: "rgba(239, 68, 68, 0.2)", border: "1px solid #ef4444", borderRadius: "12px", padding: "20px", marginBottom: "30px", color: "#ef4444" }}>
@@ -133,8 +141,9 @@ function Vault() {
 
           {assets.length === 0 ? (
             <div style={{ textAlign: "center", padding: "60px 20px" }}>
-              <div style={{ fontSize: "4rem", marginBottom: "20px", color: "#94a3b8" }}>🔐</div>
+              <div style={{ fontSize: "4rem", marginBottom: "20px", color: "#94a3b8" }}></div>
               <h3 style={{ color: "#94a3b8", marginBottom: "10px" }}>Your vault is empty</h3>
+
               <p style={{ color: "#6b7280", fontSize: "1rem" }}>Add your first digital asset to get started.</p>
               <button
                 onClick={() => navigate("/add-asset")}
@@ -151,16 +160,17 @@ function Vault() {
                   transition: "transform 0.3s ease"
                 }}
               >
-                ➕ Add First Asset
+                + Add First Asset
               </button>
+
             </div>
           ) : (
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(350px, 1fr))", gap: "20px" }}>
               {assets.map((asset) => {
                 const decryptedCredentials = getDecryptedCredentials(asset);
 
-                const isShowing = showPassword[asset.id];
-                const masked = decryptedCredentials.length > 0 ? '•'.repeat(Math.max(decryptedCredentials.length, 8)) : '[No Credentials]';
+                const isShowing = showPassword[asset.id] ?? !hideSensitive;
+                const masked = decryptedCredentials.length > 0 ? '•'.repeat(Math.max(decryptedCredentials.length, 8)) : '[No Credentials]'; 
 
                 return (
                   <div key={asset.id} style={{
@@ -185,7 +195,8 @@ function Vault() {
                         {getCategoryIcon(asset.category)}
                       </span>
                       <div style={styles.passwordSection}>
-                        <label style={{ display: "block", marginBottom: "8px", color: "#cbd5e1", fontWeight: "500" }}>🔐 Credentials</label>
+                        <label style={{ display: "block", marginBottom: "8px", color: "#cbd5e1", fontWeight: "500" }}>Credentials</label>
+
                         <div style={{ position: 'relative' }}>
                           <span style={{
                             background: "#1a1a2e",
@@ -205,9 +216,10 @@ function Vault() {
                             onClick={() => togglePassword(asset.id)}
                             title={isShowing ? 'Hide' : 'Show'}
                           >
-                            {isShowing ? '🙈' : '👁️'}
+                            {isShowing ? 'H' : 'S'}
                           </button>
                         </div>
+
                       </div>
                       <div>
                         <h3 style={{ margin: "0 0 5px 0", color: "white", fontSize: "1.3rem" }}>

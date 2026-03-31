@@ -178,7 +178,7 @@ if (!formData.name || !formData.relationship) {
                   <input
                     type="email"
                     name="email"
-                    placeholder="Enter email address (optional)"
+                    placeholder="Enter email address (required for verification)"
                     value={formData.email}
                     onChange={handleInputChange}
                     style={{ width: "100%", padding: "12px", borderRadius: "8px", border: "2px solid #475569", background: "#1a1a2e", color: "white", fontSize: "16px", transition: "border-color 0.3s ease" }}
@@ -278,7 +278,7 @@ if (!formData.name || !formData.relationship) {
               <h3 style={{ marginBottom: "20px", color: "white", textAlign: "center" }}>Your Nominees ({nominees.length})</h3>
               {nominees.length === 0 ? (
                 <div style={{ textAlign: "center", padding: "40px 20px" }}>
-                  <div style={{ fontSize: "3rem", marginBottom: "20px", color: "#94a3b8" }}>👥</div>
+
                   <p style={{ color: "#94a3b8", fontSize: "1.1rem" }}>No nominees added yet.</p>
                   <p style={{ color: "#6b7280", fontSize: "0.9rem", marginTop: "10px" }}>Add trusted individuals who can access your digital assets in case of emergency.</p>
                 </div>
@@ -287,13 +287,14 @@ if (!formData.name || !formData.relationship) {
                   {nominees.map((nominee) => (
                     <div key={nominee.id} style={{ background: "#2a2a3e", padding: "20px", borderRadius: "12px", marginBottom: "15px", border: "1px solid #475569", position: "relative" }}>
                       <h4 style={{ margin: "0 0 8px 0", color: "white", fontSize: "1.2rem" }}>{nominee.name}</h4>
-                      {nominee.email && <p style={{ margin: "0 0 5px 0", color: "#94a3b8", fontSize: "0.9rem" }}>📧 {nominee.email}</p>}
-                      <p style={{ margin: "0 0 5px 0", color: "#94a3b8", fontSize: "0.9rem" }}>👨‍👩‍👧‍👦 {nominee.relationship}</p>
-                      {nominee.phone && <p style={{ margin: "0 0 15px 0", color: "#94a3b8", fontSize: "0.9rem" }}>📞 {nominee.phone}</p>}
+{nominee.email && <p style={{ margin: "0 0 5px 0", color: "#94a3b8", fontSize: "0.9rem" }}>{nominee.email}</p>}
+<p style={{ margin: "0 0 5px 0", color: "#94a3b8", fontSize: "0.9rem" }}>{nominee.relationship}</p>
+{nominee.phone && <p style={{ margin: "0 0 15px 0", color: "#94a3b8", fontSize: "0.9rem" }}>{nominee.phone}</p>}
                       <div style={{ display: "flex", alignItems: "center", marginBottom: "15px" }}>
                         <span style={{ color: nominee.verified ? "#10b981" : "#ef4444", fontSize: "1.2rem", marginRight: "8px" }}>
-                          {nominee.verified ? "✅" : "❌"}
+                          {nominee.verified ? "✓" : "✗"}
                         </span>
+
                         <span style={{ fontWeight: "500" }}>
                           {nominee.verified ? "Verified" : "Not Verified"}
                           {nominee.verificationSent && !nominee.verified && " (Email Sent)"}
@@ -301,8 +302,9 @@ if (!formData.name || !formData.relationship) {
                       </div>
                       <div style={{ marginBottom: "15px", padding: "10px", background: "#1a1a2e", borderRadius: "8px" }}>
                         <p style={{ fontWeight: "bold", color: "#6366f1", marginBottom: "8px", fontSize: "0.9rem" }}>
-                          📁 Assigned Assets ({getNomineeAssets(nominee.id).length})
+                          Assigned Assets ({getNomineeAssets(nominee.id).length})
                         </p>
+
                         {getNomineeAssets(nominee.id).length === 0 ? (
                           <p style={{ color: "#94a3b8", fontSize: "0.8rem" }}>No assets assigned yet</p>
                         ) : (
@@ -326,8 +328,9 @@ if (!formData.name || !formData.relationship) {
                           onClick={() => handleEdit(nominee)}
                           style={{ padding: "8px 15px", background: "#f59e0b", color: "white", border: "none", borderRadius: "6px", cursor: "pointer", fontSize: "14px", transition: "background 0.3s ease" }}
                         >
-                          ✏️ Edit
+                          Edit
                         </button>
+
                         {!nominee.verified && (
                           <button
                             onClick={async () => {
@@ -355,7 +358,7 @@ if (!formData.name || !formData.relationship) {
                               opacity: nominee.verificationSent ? 0.6 : 1
                             }}
                           >
-                            📧 {nominee.verificationSent ? "Email Sent" : "Send Verification"}
+                            {nominee.verificationSent ? "Email Sent" : "Send Verification"}
                           </button>
                         )}
                         <button
@@ -377,13 +380,13 @@ if (!formData.name || !formData.relationship) {
                           }}
                           style={{ padding: "8px 15px", background: "#ef4444", color: "white", border: "none", borderRadius: "6px", cursor: "pointer", fontSize: "14px", transition: "background 0.3s ease" }}
                         >
-                          🚨 Request Emergency Access
+                           Request Emergency Access
                         </button>
                         <button
                           onClick={() => handleDelete(nominee.id)}
                           style={{ padding: "8px 15px", background: "#6b7280", color: "white", border: "none", borderRadius: "6px", cursor: "pointer", fontSize: "14px", transition: "background 0.3s ease" }}
                         >
-                          🗑️ Delete
+                           Delete
                         </button>
                       </div>
                     </div>

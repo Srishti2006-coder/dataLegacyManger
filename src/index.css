@@ -501,11 +501,12 @@ html{
 }
 
 .dashboard-tips li::before {
-  content: "✓";
+  content: "\\2714";
   color: #10b981;
   position: absolute;
   left: 0;
 }
+
 
 /* Add Asset Styles */
 .add-asset-container {

@@ -34,7 +34,7 @@ export const LoginForm = () => {
   };
 
   return (
-    <div className="minimal-auth-form">
+    <div className="minimal-auth-form bg-slate-900 text-white dark:bg-white dark:text-slate-900">
       <h2 className="simple-title">Welcome Back</h2>
       <p className="simple-subtitle">Securely access your digital legacy. Your assets await.</p>
 
@@ -65,7 +65,7 @@ export const LoginForm = () => {
             onClick={() => setShowPassword(!showPassword)}
             title={showPassword ? "Hide" : "Show"}
           >
-            {showPassword ? "🙈" : "👁️"}
+{showPassword ? "Hide" : "Show"}
           </button>
         </div>
       </div>

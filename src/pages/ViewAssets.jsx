@@ -19,8 +19,17 @@ function ViewAssets() {
   const [toast, setToast] = useState('');
   const [activeTab, setActiveTab] = useState('assets');
   const [searchQuery, setSearchQuery] = useState('');
+  const [hideSensitive, setHideSensitive] = useState(false);
   // expandedAsset state removed for stable layout
   // categories removed for clean UI
+
+  useEffect(() => {
+    const saved = localStorage.getItem('datalegacy-settings');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      setHideSensitive(parsed.hideSensitive || false);
+    }
+  }, []);
 
   useEffect(() => {
     fetchData();
@@ -75,7 +84,7 @@ function ViewAssets() {
   const togglePassword = (assetId) => {
     setShowPassword(prev => ({
       ...prev,
-      [assetId]: !prev[assetId]
+      [assetId]: !(prev[assetId] ?? !hideSensitive)
     }));
   };
 
@@ -94,8 +103,8 @@ function ViewAssets() {
   };
 
   const handleUpdateNominee = async () => {
-    if (!editForm.name || !editForm.email || !editForm.relationship) {
-      alert("Please fill in all required fields");
+    if (!editForm.name || !editForm.relationship) {
+      alert("Please fill in required fields (name and relationship)");
       return;
     }
     try {
@@ -108,7 +117,7 @@ function ViewAssets() {
       fetchData();
 setToast('[OK] Nominee updated successfully!');
     } catch (error) {
-      setToast('❌ Error updating nominee: ' + error.message);
+setToast('Error updating nominee: ' + error.message);
     }
   };
 
@@ -119,7 +128,7 @@ setToast('[OK] Nominee updated successfully!');
         fetchData();
 setToast('[OK] Nominee deleted successfully!');
       } catch (error) {
-        setToast('❌ Error deleting nominee: ' + error.message);
+setToast('Error deleting nominee: ' + error.message);
       }
     }
   };
@@ -130,13 +139,15 @@ setToast('[OK] Nominee deleted successfully!');
   };
 
   if (loading) {
-    return (
-      <div className="view-assets-container">
-        <Sidebar />
-        <div className="view-assets-main">
+  return (
+    <div className="view-assets-container bg-slate-900 text-white dark:bg-white dark:text-slate-900">
+      <Sidebar />
+      <div className="view-assets-main bg-slate-900/50 dark:bg-white/50">
+
           <div className="empty-state">
-            <div className="empty-icon">⏳</div>
+            <div className="empty-icon"></div>
             <p>Loading your digital legacy...</p>
+
           </div>
         </div>
       </div>
@@ -144,9 +155,9 @@ setToast('[OK] Nominee deleted successfully!');
   }
 
   return (
-    <div className="view-assets-container">
+    <div className="view-assets-container bg-slate-900 text-white dark:bg-white dark:text-slate-900">
       <Sidebar />
-      <div className="view-assets-main">
+      <div className="view-assets-main bg-slate-900/50 dark:bg-white/50">
         {toast && <div className="toast">{toast}</div>}
 
         <div className="view-assets-header">
@@ -156,8 +167,9 @@ setToast('[OK] Nominee deleted successfully!');
 
         {activeTab === 'assets' && (
           <div className="search-container">
-            <div className="search-icon">🔍</div>
+            <div className="search-icon"></div>
             <input
+
               type="text"
               className="search-input"
               placeholder="Search assets by title, identifier or tags..."
@@ -196,8 +208,9 @@ setToast('[OK] Nominee deleted successfully!');
             
             {filteredAssets.length === 0 ? (
               <div className="empty-state">
-                <div className="empty-icon">📦</div>
+                <div className="empty-icon"></div>
                 <p>{searchQuery ? 'No assets match your search.' : 'No assets yet.'}</p>
+
                 {searchQuery && (
                   <button className="btn btn-primary" onClick={() => setSearchQuery('')}>
                     Clear Search
@@ -207,7 +220,7 @@ setToast('[OK] Nominee deleted successfully!');
             ) : (
               <div className="assets-grid">
                 {filteredAssets.map((asset) => {
-                  const isShowingPassword = showPassword[asset.id];
+                  const isShowingPassword = showPassword[asset.id] ?? !hideSensitive;
 
                   return (
                     <div 
@@ -250,13 +263,6 @@ setToast('[OK] Nominee deleted successfully!');
 
                           </div>
                           
-                          <div className="notes-row">
-                            <span className="detail-label">Notes:</span>
-                            <div className="notes-spacing">
-                              <span className="detail-value">{asset.notes || 'No notes'}</span>
-                            </div>
-                          </div>
-                          
                           <div className="asset-meta">
                             <small>Added: {asset.createdAt?.toDate?.()?.toLocaleDateString() || "Recently"}</small>
                           </div>
@@ -275,11 +281,13 @@ setToast('[OK] Nominee deleted successfully!');
             <h2 className="view-assets-section-title">Your Nominees ({nominees.length})</h2>
             {nominees.length === 0 ? (
               <div className="empty-state">
-                <div className="empty-icon">👤</div>
+                <div className="empty-icon"></div>
                 <p>No nominees added yet.</p>
                 <button className="btn btn-primary" onClick={() => navigate("/nominee")}>
-                  ➕ Add Trusted Nominees
+
+                  + Add Trusted Nominees
                 </button>
+
               </div>
             ) : (
               <div className="nominees-grid">
@@ -317,38 +325,53 @@ setToast('[OK] Nominee deleted successfully!');
                           onChange={(e) => setEditForm({...editForm, phone: e.target.value})}
                         />
                         <div className="edit-buttons">
-                          <button className="btn btn-save" onClick={handleUpdateNominee}>💾 Save</button>
-                          <button className="btn btn-cancel" onClick={handleCancelEdit}>❌ Cancel</button>
+                          <button className="btn btn-save" onClick={handleUpdateNominee}>Save</button>
+
+                          <button className="btn btn-cancel" onClick={handleCancelEdit}>Cancel</button>
                         </div>
+
                       </div>
                     ) : (
                       <>
                         <div className="nominee-header">
                           <h3>{nominee.name}</h3>
-                          <div className="nominee-actions">
-                            <button className="btn btn-secondary btn-small" onClick={() => handleEditNominee(nominee)}>
-                              ✏️ Edit
-                            </button>
-                            <button className="btn btn-danger btn-small" onClick={() => handleDeleteNominee(nominee.id)}>
-                              🗑️ Delete
-                            </button>
-                          </div>
                         </div>
                         <div className="nominee-details">
                           <div className="detail-row">
-                            <span className="detail-label">📧 Email:</span>
+                            <span className="detail-label">Email:</span>
                             <span className="detail-value">{nominee.email}</span>
+
                           </div>
                           <div className="detail-row">
-                            <span className="detail-label">👨‍👩‍👧‍👦 Relationship:</span>
+                            <span className="detail-label">Relationship:</span>
                             <span className="detail-value">{nominee.relationship}</span>
+
                           </div>
                           {nominee.phone && (
                             <div className="detail-row">
-                              <span className="detail-label">📞 Phone:</span>
+                              <span className="detail-label">Phone:</span>
                               <span className="detail-value">{nominee.phone}</span>
+
                             </div>
                           )}
+                        </div>
+                        <div className="nominee-actions">
+                          <button
+                            onClick={() => handleEditNominee(nominee)}
+                            className="btn btn-edit"
+                            style={{ padding: "8px 15px", background: "#f59e0b", color: "white", border: "none", borderRadius: "6px", cursor: "pointer", fontSize: "14px", transition: "background 0.3s ease" }}
+                          >
+                            Edit
+                          </button>
+
+                          <button
+                            onClick={() => handleDeleteNominee(nominee.id)}
+                            className="btn btn-delete"
+                            style={{ padding: "8px 15px", background: "#6b7280", color: "white", border: "none", borderRadius: "6px", cursor: "pointer", fontSize: "14px", transition: "background 0.3s ease" }}
+                          >
+                            Delete
+                          </button>
+
                         </div>
                       </>
                     )}

@@ -81,7 +81,7 @@ function EmergencyAccess() {
       <div style={{ marginLeft: "260px", padding: "40px", width: "100%" }}>
         <div style={{ maxWidth: "1000px", margin: "0 auto" }}>
           <h1 style={{ fontSize: "2.5rem", marginBottom: "10px", textAlign: "center", textShadow: "0 0 20px rgba(239, 68, 68, 0.5)" }}>
-            🚨 Emergency Access
+Emergency Access
           </h1>
           <p style={{ color: "#94a3b8", textAlign: "center", marginBottom: "40px", fontSize: "1.1rem" }}>
             Request temporary access to the owner's vault. OTP required for verification.
@@ -89,7 +89,7 @@ function EmergencyAccess() {
 
           {requests.length === 0 && !showOtpForm && (
             <div style={{ textAlign: "center", padding: "60px 40px" }}>
-              <div style={{ fontSize: "4rem", marginBottom: "30px", color: "#94a3b8" }}>🚨</div>
+
               <h3 style={{ color: "#94a3b8", marginBottom: "20px" }}>No pending requests</h3>
               <p style={{ color: "#6b7280", marginBottom: "30px" }}>Click below to request emergency vault access.</p>
               <button
@@ -105,7 +105,7 @@ function EmergencyAccess() {
                   cursor: "pointer"
                 }}
               >
-                📤 Send Access Request
+Send Access Request
               </button>
             </div>
           )}
@@ -162,7 +162,7 @@ function EmergencyAccess() {
           {currentRequest && (
             <div style={{ maxWidth: "800px", margin: "0 auto" }}>
               <div style={{ textAlign: "center", marginBottom: "40px" }}>
-                <div style={{ fontSize: "4rem", color: "#10b981" }}>✅</div>
+
                 <h2 style={{ marginBottom: "10px" }}>Temporary Access Granted!</h2>
                 <p>Access expires: {currentRequest.accessUntil.toLocaleString()}</p>
               </div>
@@ -222,7 +222,7 @@ function EmergencyAccess() {
                   cursor: "pointer"
                 }}
               >
-                🔑 Enter OTP for Pending Request
+Enter OTP for Pending Request
               </button>
             </div>
           )}

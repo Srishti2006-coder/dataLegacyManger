@@ -129,7 +129,7 @@ const TagInput = ({ value = [], onChange, placeholder = "Type or select a catego
             onMouseEnter={(e) => { e.target.style.opacity = '1'; }}
             onMouseLeave={(e) => { e.target.style.opacity = '0.8'; }}
           >
-            ✖
+            ×
           </button>
         </div>
       ))}

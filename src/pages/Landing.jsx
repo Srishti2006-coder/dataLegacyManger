@@ -18,32 +18,32 @@ function Landing() {
         </p>
         <div className="features-grid">
           <div className="feature-card">
-            <div className="feature-icon">🔒</div>
+<div className="feature-icon"></div>
             <h3>Secure Vault</h3>
             <p>Store and manage your digital legacy with military-grade encryption.</p>
           </div>
           <div className="feature-card">
-            <div className="feature-icon">🤖</div>
+<div className="feature-icon"></div>
             <h3>AI-Powered</h3>
             <p>Leverage artificial intelligence to organize and optimize your assets.</p>
           </div>
           <div className="feature-card">
-            <div className="feature-icon">📊</div>
+<div className="feature-icon"></div>
             <h3>Analytics</h3>
             <p>Get insights into your digital footprint with comprehensive analytics.</p>
           </div>
           <div className="feature-card">
-            <div className="feature-icon">🌐</div>
+<div className="feature-icon"></div>
             <h3>Cloud Integration</h3>
             <p>Seamlessly integrate with cloud services for enhanced accessibility.</p>
           </div>
           <div className="feature-card">
-            <div className="feature-icon">⚡</div>
+<div className="feature-icon"></div>
             <h3>Fast & Reliable</h3>
             <p>Experience lightning-fast performance with our optimized infrastructure.</p>
           </div>
           <div className="feature-card">
-            <div className="feature-icon">🛡️</div>
+<div className="feature-icon"></div>
             <h3>Privacy First</h3>
             <p>Your data privacy is our top priority, with zero-knowledge architecture.</p>
           </div>

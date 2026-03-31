@@ -1,0 +1,240 @@
+
+
+/* Profile.css - FINAL CLEAN VERSION */
+
+/* VARIABLES */
+:root {
+  --bg-primary: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+  --card-bg: linear-gradient(145deg, #1e293b, #334155);
+  --border-color: #475569;
+  --text-primary: #e2e8f0;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --primary-color: #6366f1;
+  --primary-hover: #8b5cf6;
+  --success-color: #10b981;
+  --danger-color: #ef4444;
+  --shadow-sm: 0 4px 12px rgba(0,0,0,0.2);
+  --shadow-md: 0 10px 30px rgba(0,0,0,0.3);
+  --shadow-lg: 0 20px 40px rgba(0,0,0,0.4);
+  --transition: all 0.3s ease;
+}
+
+/* BASE */
+.profile-container {
+  display: flex;
+  background: var(--bg-primary);
+  min-height: 100vh;
+  color: var(--text-primary);
+}
+
+.profile-main {
+  margin-left: 260px;
+  padding: 40px;
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .profile-main {
+    margin-left: 0;
+    padding: 20px;
+  }
+}
+
+/* HEADER */
+.profile-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.profile-title {
+  font-size: 2.5rem;
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.profile-subtitle {
+  color: var(--text-secondary);
+}
+
+/* 🔥 HORIZONTAL GLASS CARD */
+.profile-glass-card {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+
+  padding: 20px 28px;
+  border-radius: 18px;
+
+  background: rgba(255,255,255,0.05);
+  backdrop-filter: blur(18px);
+
+  border: 1px solid rgba(255,255,255,0.1);
+  box-shadow: var(--shadow-md);
+
+  max-width: 520px;
+  margin: 0 auto 40px;
+
+  transition: var(--transition);
+  animation: floatCard 4s ease-in-out infinite;
+}
+
+.profile-glass-card:hover {
+  transform: scale(1.03);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--primary-color);
+}
+
+/* Avatar */
+.profile-mini-avatar {
+  width: 65px;
+  height: 65px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  color: white;
+  font-weight: bold;
+}
+
+/* Info */
+.profile-glass-info h3 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.profile-glass-info p {
+  margin: 2px 0;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+/* ✨ FLOAT ANIMATION */
+@keyframes floatCard {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+  100% { transform: translateY(0); }
+}
+
+/* 🚀 ACTION CARDS - HORIZONTAL */
+.actions-grid {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  flex-wrap: nowrap;
+}
+
+/* MOBILE */
+@media (max-width: 768px) {
+  .actions-grid {
+    flex-direction: column;
+    align-items: center;
+  }
+}
+
+/* CARD */
+.action-card {
+  width: 200px;
+  height: 140px;
+
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 18px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  cursor: pointer;
+  transition: var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Glow effect */
+.action-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg, transparent, rgba(99,102,241,0.2), transparent);
+  opacity: 0;
+  transition: 0.4s;
+}
+
+.action-card:hover::before {
+  opacity: 1;
+}
+
+/* Hover */
+.action-card:hover {
+  transform: translateY(-8px) scale(1.05);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--primary-color);
+}
+
+/* ICON */
+.action-icon {
+  font-size: 2rem;
+  margin-bottom: 10px;
+  transition: var(--transition);
+}
+
+.action-card:hover .action-icon {
+  transform: scale(1.2);
+}
+
+/* COLORS */
+.action-card:nth-child(1) .action-icon {
+  color: var(--primary-color);
+}
+
+.action-card:nth-child(2) .action-icon {
+  color: var(--success-color);
+}
+
+.action-card:nth-child(3) .action-icon {
+  color: #38bdf8;
+}
+
+/* TEXT */
+.action-card h3 {
+  font-size: 1rem;
+  color: var(--text-primary);
+}
+
+/* Tailwind fallback */
+.max-w-4xl { max-width: 1024px; margin: auto; }
+
+/* 🔥 FAST & SMOOTH ENTRY (reduced delay) */
+
+.profile-main > div {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: pageFadeIn 0.6s ease forwards;
+  animation-delay: 0.2s; /* 👈 pehle 0.6 tha, ab fast */
+}
+
+/* stagger (fast sequence) */
+.profile-header {
+  animation-delay: 0.2s;
+}
+
+.profile-glass-card {
+  animation-delay: 0.35s;
+}
+
+.actions-grid {
+  animation-delay: 0.5s;
+}
+
+/* animation */
+@keyframes pageFadeIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

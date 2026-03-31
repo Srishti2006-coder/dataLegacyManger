@@ -8,7 +8,7 @@ function Sidebar() {
 
   return (
 
-    <div className="sidebar-container">
+    <div className="sidebar-container bg-slate-900 text-white dark:bg-white dark:text-slate-900">
 
       <h2 className="sidebar-logo">LegacyAI</h2>
 

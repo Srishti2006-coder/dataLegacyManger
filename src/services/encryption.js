@@ -23,7 +23,6 @@ export const decryptField = (encryptedText, userEmail) => {
     const bytes = CryptoJS.AES.decrypt(encryptedText, key);
     return bytes.toString(CryptoJS.enc.Utf8);
   } catch (error) {
-    console.error('Decryption failed:', error);
     return '[Decryption Failed]';
   }
 };

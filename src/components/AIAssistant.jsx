@@ -92,7 +92,7 @@ const AIAssistant = () => {
           e.target.style.boxShadow = '0 10px 30px rgba(59, 130, 246, 0.4), 0 25px 50px rgba(0,0,0,0.25)';
         }}
       >
-        {isOpen ? '✕' : '💬'}
+{isOpen ? '×' : 'Chat'}
       </button>
 
       {/* Chat Window */}

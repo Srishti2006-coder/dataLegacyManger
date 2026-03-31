@@ -63,7 +63,6 @@ const AnimatedSVGHero = () => {
           </path>
           {/* Legacy symbol */}
           <text x="0" y="40" textAnchor="middle" fontSize="48" fontFamily="Inter, sans-serif" fontWeight="bold" fill="url(#vaultGradient)" filter="url(#glow)">
-            🔐
             <animate attributeName="opacity" values="1;0.3;1" dur="3s" repeatCount="indefinite"/>
           </text>
         </g>
