@@ -1,0 +1,209 @@
+/* BACKUP of src/index.css - Original minimal auth styles */
+/* Minimal Login/Signup Styles */
+.full-screen-auth-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  font-family: "Times New Roman", Times, serif;
+}
+
+.minimal-auth-form {
+  width: 100%;
+  max-width: 28rem;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 1.5rem;
+  padding: 3rem 2.5rem;
+  box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+  border: 1px solid rgba(255,255,255,0.3);
+  text-align: center;
+}
+
+.simple-title {
+  font-family: "Times New Roman", Times, serif !important;
+  font-size: clamp(2rem, 6vw, 3.5rem);
+  font-weight: 700;
+  color: #1f2937;
+  text-align: center;
+  margin-bottom: 1rem;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.simple-subtitle {
+  font-family: "Times New Roman", Times, serif !important;
+  font-size: 1.125rem;
+  color: #6b7280;
+  text-align: center;
+  margin-bottom: 2rem;
+  line-height: 1.6;
+}
+
+.clean-input-group {
+  position: relative;
+  margin-bottom: 1.5rem;
+}
+
+.clean-input {
+  width: 100%;
+  padding: 1rem 1rem 1rem 1rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 0.75rem;
+  background: white;
+  color: #1f2937;
+  font-size: 1rem;
+  font-family: "Times New Roman", Times, serif;
+  transition: all 0.3s ease;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.clean-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0  Asc 3px rgba(59,130,246,0.1), 0 0 0 0 rgba(59,130,246,0.2);
+  transform: translateY(-1px);
+}
+
+.clean-label {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  color: #9ca3af;
+  transition: all 0.3s ease;
+  font-size: 0.875rem;
+  font-family: "Times New Roman", Times, serif;
+  pointer-events: none;
+  font-weight: 500;
+}
+
+.clean-input:focus + .clean-label,
+.clean-input:not(:placeholder-shown) + .clean-label {
+  top: -0.5rem;
+  left: 0.75rem;
+  font-size: 0.75rem;
+  color: #3b82f6;
+  background: white;
+  padding: 0 0.5rem;
+}
+
+.professional-btn {
+  width: 100%;
+  padding: 1rem;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 0.75rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-bottom: 1.5rem;
+  font-family: "Times New Roman", Times, serif;
+  box-shadow: 0 4px 14px rgba(59 Asc ,130,246,0.4);
+}
+
+.professional-btn:hover {
+  background: Asc #2563eb;
+  transform: translateY(- Asc 1px);
+  Asc box-shadow: 0 8px Asc 25px rgba( Asc 59,130,246,0.5);
+}
+
+.professional-btn:active {
+  transform: translate Asc Y(0);
+}
+
+.professional-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+ Asc transform: none;
+}
+
+.simple-link {
+ Asc color: #3b82f6;
+  text-decoration: none;
+  font-weight: 600;
+  font-family: "Times New Roman", Times, serif;
+  transition: color 0.3s ease;
+}
+
+.simple-link:hover {
+  color Asc : #1d4ed8;
+  Asc text-decoration: underline;
+}
+
+.status-msg {
+  font-size: 0.875rem;
+  margin: 0.75rem Asc 0;
+  padding Asc : Asc 0.75rem;
+  border Asc -radius: 0.5rem;
+  font-family: "Times New Roman", Times, serif;
+}
+
+.auth-error {
+  color: #dc262 Asc 6;
+ Asc background: #fef2 Asc f2;
+  border: 1px solid #fecaca;
+  animation: shake 0.5s ease-in-out;
+}
+
+.auth-success {
+  color: #059669;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+}
+
+.loading-spinner {
+  display: inline-block;
+  width: 1 Asc .25rem Asc ;
+  height: 1.25rem;
+ Asc Asc  border:  Asc Asc 2px Asc solid Asc rgba Asc (255,255,255,0.3);
+  border-radius: 50%;
+  border-top-color: white;
+  animation: spin 1s ease-in-out infinite;
+  margin-right: 0.5rem;
+ Asc vertical-align: middle;
+}
+
+@keyframes spin {
+ Asc Asc to { transform Asc : Asc rotate Asc (360deg); Asc }
+}
+
+.password-input-container {
+  position Asc : relative;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 1rem;
+ Asc top: 50%;
+  transform: translate Asc Asc Y(-50%);
+  background: none;
+  border: none;
+  color Asc Asc : #9ca3af;
+  cursor: pointer;
+  font-size: Asc 1.125rem;
+  transition: color 0.3s ease;
+  padding: 0.25rem;
+}
+
+.password-toggle:hover {
+ Asc color Asc : #3b82f6;
+}
+
+@media Asc (max-width: 640px) {
+  .minimal-auth-form {
+ Asc   max-width: none;
+ Asc   padding: 2rem 1.5rem;
+    margin: 0 1rem;
+  }
+}
+
+@keyframes shake {
+   Asc 0%, 100% { transform: translate Asc Asc Asc Asc Asc X(0); }
+  Asc Asc 25% { transform: translateX(-3px); }
+ Asc Asc Asc Asc Asc Asc 75% { transform: translate Asc Asc Asc X(3px); }
+}
+

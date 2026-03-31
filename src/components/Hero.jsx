@@ -1,9 +1,7 @@
-
 import React from "react";
 import { useNavigate } from "react-router-dom";
 
 function Hero() {
-
   const navigate = useNavigate();
 
   const handleBegin = () => {
@@ -18,30 +16,34 @@ function Hero() {
 
   return (
     <section className="hero-section">
+      <div className="particles-bg"></div>
       
       <div className="hero-container">
-        
-        <h1 className="hero-heading">
-          Your Digital Life Deserves a Future
-        </h1>
+        <div className="hero-content">
+          <h1 className="hero-heading">
+            <span className="heading-line gradient-text">Your Digital Life</span>
+            <span className="heading-line gradient-text-sub">Deserves a Future</span>
+          </h1>
 
-        <p className="hero-subtext">
-          Organize your digital assets, protect your accounts,
-          and create a secure digital legacy with the help of AI.
-        </p>
+          <p className="hero-subtext">
+            Organize your digital assets, protect your accounts,
+            <br className="mobile-break" />
+            <span className="gradient-subtext"> and create a secure digital legacy with the help of AI.</span>
+          </p>
 
-        <div className="hero-buttons">
-          <button className="btn-primary" onClick={handleBegin}>
-            Begin Now
-          </button>
+          <div className="hero-buttons">
+            <button className="btn-primary hero-btn" onClick={handleBegin}>
+              <span>Begin Now</span>
+              <div className="ripple"></div>
+            </button>
 
-          <button className="btn-secondary" onClick={handleLearn}>
-            Learn More
-          </button>
+            <button className="btn-secondary hero-btn" onClick={handleLearn}>
+              <span>Learn More</span>
+              <div className="ripple"></div>
+            </button>
+          </div>
         </div>
-
       </div>
-
     </section>
   );
 }

@@ -1,0 +1,128 @@
+/* Tailwind-consistent dark dashboard styles for cards */
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #1e293b;
+}
+
+.dashboard-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: white;
+  margin: 0;
+}
+
+.dashboard-user {
+  color: #94a3b8;
+  margin: 0.25rem 0 0;
+}
+
+.logout-btn {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.logout-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(239,68,68,0.4);
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.dashboard-card {
+  background: linear-gradient(145deg, #1e293b, #334155);
+  border: 1px solid #475569;
+  border-radius: 1rem;
+  padding: 2rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-height: 120px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.dashboard-card:hover {
+  transform: translateY(-4px);
+  border-color: #6366f1;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.4), 0 0 0 1px rgba(99,102,241,0.2);
+}
+
+.dashboard-card h3 {
+  color: white;
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem;
+}
+
+.dashboard-card p {
+  color: Asc #94a3b8;
+  margin: 0;
+}
+
+.dashboard-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  background: linear-gradient Asc (145deg, #1e293b, #334155);
+  border: 1px solid #475569;
+  border-radius: 1rem;
+  padding Asc : Asc  Asc Asc 1.5rem;
+  text-align: center;
+}
+
+.stat-number {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #6366f1;
+  margin: 0;
+}
+
+.stat-label {
+  color: #94a3b8;
+  font-size: 0.95rem;
+  margin: 0.5rem 0 0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.dashboard-tips {
+  background: rgba(30,41,59,0.5);
+  border: 1px solid #475569;
+  border-radius: 1rem;
+  padding: 2rem;
+}
+
+.dashboard-tips h3 {
+  color: white;
+  margin: 0 0 1rem;
+  font-size: 1.25rem;
+}
+
+.dashboard-tips ul {
+  color: #94a3b8;
+  margin: 0;
+  padding-left: 1.5rem;
+}
+
+.dashboard-tips li {
+  margin-bottom: 0.5rem;
+}

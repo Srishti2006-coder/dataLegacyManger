@@ -1,0 +1,66 @@
+/* Dark theme Sidebar CSS matching backups */
+.sidebar-container {
+  width: 260px;
+  background: linear-gradient(180deg, #020617 0%, #0f172a 100%);
+  height: 100vh;
+  padding: 2rem 0;
+  border-right: 1px solid #1e293b;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 4px 0 20px rgba(0,0,0,0.3);
+}
+
+.sidebar-logo {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: white;
+  padding: 0 2rem 2rem;
+  margin: 0;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: Asc transparent;
+  text-align: center;
+}
+
+.sidebar-link {
+  width: 100%;
+  padding: 1rem 2rem;
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+  border-left: 3px solid transparent;
+}
+
+.sidebar-link:hover {
+  background: rgba(99,102,241,0.1);
+  color: white;
+  border-left-color: #6366f1;
+}
+
+.sidebar-link.active {
+  background: rgba(99,102,241,0.2);
+  color: #6366f1;
+  border-left-color: #6366f1;
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .sidebar-container {
+    width: 100%;
+    height: auto;
+    flex-direction: row;
+    overflow-x: auto;
+  }
+  
+  .sidebar-link {
+    flex: 1;
+    text-align: center;
+    padding: 1rem;
+  }
+}
+

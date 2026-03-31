@@ -1,3 +1,5 @@
+
+
 import { useState } from "react";
 import { auth, db } from "../services/firebase";
 import { createUserWithEmailAndPassword } from "firebase/auth";
@@ -49,34 +51,31 @@ const handleSignup = async () => {
 };
 
 return(
-  <div className="full-screen-auth-container">
-  <div className="minimal-auth-form">
+<div className="auth-container">
+  <div className="auth-card auth-form">
+    <h2 className="auth-title">Create Account</h2>
 
-    <h2 className="simple-title">Create Account</h2>
-    <p className="simple-subtitle">Safeguard your digital legacy for generations to come.</p>
-
-
-    <div className="clean-input-group">
+    <div className="auth-input-group">
       <input
-        className="clean-input"
+        className="auth-input"
         type="email"
         placeholder=" "
         value={email}
         onChange={(e) => setEmail(e.target.value)}
       />
-      <label className="clean-label">Email</label>
+      <label className="auth-label">Email</label>
     </div>
 
-    <div className="clean-input-group">
+    <div className="auth-input-group">
       <div className="password-input-container">
         <input
-          className="clean-input"
+          className="auth-input"
           type={showPassword ? "text" : "password"}
           placeholder=" "
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
-        <label className="clean-label">Password</label>
+        <label className="auth-label">Password</label>
         <button
           type="button"
           className="password-toggle"
@@ -92,7 +91,7 @@ return(
     {success && <div className="auth-success">{success}</div>}
 
     <button
-      className="professional-btn"
+      className="auth-button"
       onClick={handleSignup}
       disabled={loading}
     >
@@ -102,7 +101,7 @@ return(
 
     <p>
       Already have an account?
-      <a href="/login" className="simple-link"> Login</a>
+      <a href="/login" className="auth-link"> Login</a>
     </p>
   </div>
 </div>

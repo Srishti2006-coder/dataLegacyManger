@@ -66,7 +66,7 @@ function Landing() {
         <p style={{ color: "#e2e8f0", maxWidth: "600px", margin: "0 auto 40px", fontSize: "1.2rem" }}>
           Join thousands of users who trust LegacyAI to manage their digital future.
         </p>
-        <a href="#signup" className="btn-primary">Get Started Today</a>
+        <a href="#signup" className="btn-primary enhanced-cta">Get Started Today</a>
       </section>
     </div>
   );

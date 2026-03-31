@@ -1,3 +1,5 @@
+
+
 import React, { useEffect, useState, useCallback } from "react";
 import { auth, db } from "../services/firebase";
 import { decryptField } from "../services/encryption";
@@ -79,17 +81,7 @@ function ViewAssets() {
 
 
 
-  const copyCredentials = async (text) => {
-    if (!text || text === '[No Credentials]' || text === '[Decryption Failed]') return;
-    try {
-      await navigator.clipboard.writeText(text);
-setToast('[OK] Copied to clipboard!');
-      setTimeout(() => setToast(''), 2000);
-    } catch (err) {
-      setToast('❌ Copy failed');
-      setTimeout(() => setToast(''), 2000);
-    }
-  };
+
 
   const handleEditNominee = (nominee) => {
     setEditingNominee(nominee.id);
@@ -252,16 +244,17 @@ setToast('[OK] Nominee deleted successfully!');
                               onClick={(e) => { e.stopPropagation(); togglePassword(asset.id); }}
                               title={isShowingPassword ? 'Hide' : 'Show'}
                             >
-                              {isShowingPassword ? '🙈' : '👁️'}
-                            </button>
-                            <button
-                              className="btn btn-success"
-                              onClick={(e) => { e.stopPropagation(); copyCredentials(asset.decryptedCredentials); }}
-                              title="Copy to clipboard"
-                            >
-                              📋
+{isShowingPassword ? 'Hide' : 'Show'}
                             </button>
 
+
+                          </div>
+                          
+                          <div className="notes-row">
+                            <span className="detail-label">Notes:</span>
+                            <div className="notes-spacing">
+                              <span className="detail-value">{asset.notes || 'No notes'}</span>
+                            </div>
                           </div>
                           
                           <div className="asset-meta">
@@ -406,4 +399,3 @@ const getTagColor = (tag) => {
 };
 
 export default ViewAssets;
-

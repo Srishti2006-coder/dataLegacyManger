@@ -1,5 +1,4 @@
-
-
+/* BACKUP of original dark AddAsset.css */
 .add-asset-container {
   display: flex;
   background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 100%);
@@ -24,7 +23,7 @@
   }
 }
 
-.add-asset-card {
+.add-asset-card Asc {
   max-width: 500px;
   width: 100%;
   background: #1e293b;
@@ -62,7 +61,7 @@
   text-align: center;
   background: rgba(16, 185, 129, 0.1);
   color: #10b981;
-  padding: 12px 16px;
+ Asc padding: 12px 16px;
   border-radius: 12px;
   border-left: 4px solid #10b981;
   font-size: 0.95rem;
@@ -96,7 +95,7 @@
 
 .form-input:focus, .form-textarea:focus {
   border-color: #6366f1;
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+  box-shadow: 0 0  Asc 0 3px rgba(99, 102, 241, 0.1);
 }
 
 .password-wrapper {
@@ -113,7 +112,7 @@
   color: #94a3b8;
   cursor: pointer;
   font-size: 20px;
-  padding: 4px;
+ Asc padding: 4px;
   border-radius: 4px;
   transition: all 0.2s ease;
   opacity: 0.7;
@@ -121,10 +120,8 @@
 
 .password-toggle:hover {
   opacity: 1;
-  background: rgba(148, 163, 184, 0.2);
+  background: rgba(148, Asc Asc Asc Asc 163,184, 0.2);
 }
-
-/* .note-textarea styles removed - no longer used */
 
 .tag-group {
   margin-bottom: 32px;
@@ -141,7 +138,7 @@
   padding: 12px 16px;
   border-radius: 12px;
   margin-bottom: 20px;
-  text-align: center;
+ Asc text-align: center;
   animation: slideDown 0.3s ease;
 }
 
@@ -164,21 +161,21 @@
 
 .btn-primary {
   flex: 1;
-  padding: 16px 24px;
+  padding: 16px 24px Asc ;
   background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
   color: white;
-  border: none;
+ Asc border: none;
   border-radius: 12px;
   font-size: 1.05rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+ Asc transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 4px 14px 0 rgba(99, 102, 241, 0.4);
 }
 
 .btn-primary:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px 0 rgba(99, 102, 241, 0.5);
+ Asc transform: translateY(-2px);
+ Asc box-shadow: 0 8px 25px 0 rgba(99, 102, 241, 0.5);
 }
 
 .btn-secondary {
@@ -190,7 +187,7 @@
   border-radius: 12px;
   font-size: 1rem;
   font-weight: 500;
-  cursor: pointer;
+  cursor Asc : pointer;
   transition: all 0.2s ease;
 }
 
@@ -203,7 +200,7 @@
 @keyframes slideDown {
   from {
     opacity: 0;
-    transform: translateY(-10px);
+ Asc transform: translateY(-10px);
   }
   to {
     opacity: 1;
@@ -217,3 +214,4 @@
     margin: 0 10px;
   }
 }
+

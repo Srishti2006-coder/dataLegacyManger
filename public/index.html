@@ -24,11 +24,70 @@
       work correctly both with client-side routing and a non-root public URL.
       Learn how to configure a non-root public URL by running `npm run build`.
     -->
-    <title>React App</title>
+    <title>Data Legacy Manager</title>
+    
+    <!-- tsParticles CDN for interactive particles -->
+    <script src="https://cdn.jsdelivr.net/npm/tsparticles@3/tsparticles.bundle.min.js"></script>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
+    
+    <!-- Confetti CDN for success effects -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+    <script>window.confetti = confetti;</script>
+
+    <!-- Auth particles container -->
+    <div id="tsparticles-auth" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none;"></div>
+    <script>
+      let authParticlesLoaded = false;
+      function initAuthParticles() {
+        if (authParticlesLoaded || typeof tsParticles === 'undefined') return;
+        authParticlesLoaded = true;
+        tsParticles.load('tsparticles-auth', {
+          particles: {
+            number: { value: 60, density: { enable: true, value_area: 800 } },
+            color: { value: ['#00ff88', '#ff00ff', '#0088ff'] },
+            shape: { type: 'circle' },
+            opacity: { value: 0.6, random: true },
+            size: { value: 2, random: true },
+            line_linked: { enable: true, distance: 150, color: '#00ff88', opacity: 0.3, width: 1 },
+            move: { 
+              enable: true, 
+              speed: 2, 
+              direction: 'none', 
+              random: true, 
+              straight: false, 
+              out_mode: 'out',
+              bounce: false 
+            }
+          },
+          interactivity: {
+            events: {
+              onhover: { enable: true, mode: 'grab' },
+              onclick: { enable: true, mode: 'push' }
+            },
+            modes: {
+              grab: { distance: 200, line_linked: { opacity: 0.5 } },
+              push: { quantity: 4 }
+            }
+          },
+          detectRetina: true,
+          background: { color: { value: 'transparent' } }
+        });
+      }
+      // Init with retry after full load
+      let initAttempts = 0;
+      function tryInitAuthParticles() {
+        initAttempts++;
+        if (typeof tsParticles !== 'undefined' && !authParticlesLoaded) {
+          initAuthParticles();
+        } else if (initAttempts < 10) {
+          setTimeout(tryInitAuthParticles, 200);
+        }
+      }
+      window.addEventListener('load', tryInitAuthParticles);
+    </script>
     <!--
       This HTML file is a template.
       If you open it directly in the browser, you will see an empty page.

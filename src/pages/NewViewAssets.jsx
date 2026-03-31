@@ -17,7 +17,7 @@ function ViewAssets() {
   const [toast, setToast] = useState('');
 
   const categories = [
-    { value: "password", label: "Password/Credentials", icon: "🔐" },
+{ value: "password", label: "Password/Credentials" },
     // ... (keep existing for legacy)
   ];
 
@@ -86,7 +86,7 @@ function ViewAssets() {
 setToast('[OK] Copied to clipboard!');
       setTimeout(() => setToast(''), 2000);
     } catch (err) {
-      setToast('❌ Copy failed');
+setToast('Copy failed');
     }
   };
 
@@ -153,7 +153,7 @@ setToast('[OK] Copied to clipboard!');
         <Sidebar />
         <div style={styles.main}>
           <div style={{ textAlign: "center", padding: "50px" }}>
-            <div style={{ fontSize: "2rem", marginBottom: "20px" }}>⏳</div>
+<div style={{ fontSize: "2rem", marginBottom: "20px" }}>Loading...</div>
             <p>Loading your digital legacy...</p>
           </div>
         </div>
@@ -199,10 +199,10 @@ setToast('[OK] Copied to clipboard!');
 
         {/* Assets Section */}
         <div style={styles.section}>
-          <h2 style={styles.sectionTitle}>📁 Your Assets ({assets.length})</h2>
+<h2 style={styles.sectionTitle}>Your Assets ({assets.length})</h2>
           {assets.length === 0 ? (
             <div style={styles.emptyState}>
-              <div style={{ fontSize: "3rem", marginBottom: "20px" }}>📦</div>
+<div style={{ fontSize: "3rem", marginBottom: "20px" }}>No Assets</div>
               <p>No assets yet. Add your first secure asset.</p>
             </div>
           ) : (
@@ -211,7 +211,7 @@ setToast('[OK] Copied to clipboard!');
                 const isExpanded = asset.decryptedCredentials !== '[No Credentials]';
                 const isShowingPassword = showPassword[asset.id];
                 const category = asset.tags?.[0] || asset.category || 'other';
-                const icon = categories.find(c => c.value === category.toLowerCase())?.icon || '📦';
+                const icon = 'Asset';
 
                 return (
                   <div key={asset.id} style={styles.assetCard}>
@@ -238,7 +238,7 @@ setToast('[OK] Copied to clipboard!');
                     {isExpanded && (
                       <div style={styles.assetDetails}>
                         <div style={styles.detailRow}>
-                          <span style={styles.detailLabel}>👤 Identifier:</span>
+Identifier:
                           <span style={styles.detailValue}>
                             {asset.identifier || (asset.fields?.find(f => f.fieldName.toLowerCase().includes('identifier') || f.fieldName.toLowerCase().includes('username'))?.encryptedValue ? '[Encrypted Username]' : 'N/A')}
                           </span>
@@ -246,7 +246,7 @@ setToast('[OK] Copied to clipboard!');
 
                         <div style={styles.passwordSection}>
                           <div style={styles.detailRow}>
-                            <span style={styles.detailLabel}>🔐 Credentials:</span>
+Credentials:
                             <div style={{ flex: 1, position: 'relative' }}>
                               <span style={styles.detailValue} className="password-display">
                                 {isShowingPassword 
@@ -259,14 +259,14 @@ setToast('[OK] Copied to clipboard!');
                                 onClick={() => togglePassword(asset.id)}
                                 title={isShowingPassword ? 'Hide' : 'Show'}
                               >
-                                {isShowingPassword ? '🙈' : '👁️'}
+                                {isShowingPassword ? 'Hide' : 'Show'}
                               </button>
                               <button
                                 style={styles.copyButton}
                                 onClick={() => copyCredentials(asset.decryptedCredentials)}
                                 title="Copy to clipboard"
                               >
-                                📋
+Copy
                               </button>
                             </div>
                           </div>
@@ -274,7 +274,7 @@ setToast('[OK] Copied to clipboard!');
 
                         {asset.note && (
                           <div style={styles.detailRow}>
-                            <span style={styles.detailLabel}>📝 Note:</span>
+Note:
                             <span style={styles.detailValue}>{asset.note}</span>
                           </div>
                         )}
@@ -294,12 +294,12 @@ setToast('[OK] Copied to clipboard!');
         {/* Nominees & Summary sections unchanged */}
         {/* ... keep existing nominees code ... */}
         <div style={styles.section}>
-          <h2 style={styles.sectionTitle}>👥 Your Nominees ({nominees.length})</h2>
+<h2 style={styles.sectionTitle}>Your Nominees ({nominees.length})</h2>
           {/* existing nominees JSX */}
         </div>
 
         <div style={styles.summarySection}>
-          <h2 style={styles.sectionTitle}>📊 Legacy Summary</h2>
+<h2 style={styles.sectionTitle}>Legacy Summary</h2>
           <div style={styles.summaryCard}>
             <div style={styles.summaryItem}>
               <span style={styles.summaryNumber}>{assets.length}</span>

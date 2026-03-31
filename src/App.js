@@ -16,10 +16,8 @@ import NomineeVerify from "./pages/NomineeVerify";
 import EmergencyAccess from "./pages/EmergencyAccess";
 
 function App() {
-
-return(
-
-<Router>
+  return (
+    <Router>
 
 <Routes>
 
@@ -31,10 +29,8 @@ return(
 
 <Route path="/dashboard" element={<Dashboard />} />
 
-<Route path="/add-asset" element={<AddAsset />} />
-<Route path="/new-add-asset" element={<AddAsset />} />
-<Route path="/view-assets" element={<ViewAssets />} />
-<Route path="/new-view-assets" element={<ViewAssets />} />
+  <Route path="/add-asset" element={<AddAsset />} />
+  <Route path="/view-assets" element={<ViewAssets />} />
 
 <Route path="/nominee" element={<Nominee />} />
 

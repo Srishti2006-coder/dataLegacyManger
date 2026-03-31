@@ -13,7 +13,7 @@ function Vault() {
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState({});
 
-  const [toast, setToast] = useState('');
+  // toast state removed - no longer used
 
   const styles = {
     passwordSection: {
@@ -36,20 +36,6 @@ function Vault() {
       cursor: 'pointer',
       fontSize: '1.1rem'
     },
-    copyButton: {
-      position: 'absolute',
-      right: '44px',
-      top: '50%',
-      transform: 'translateY(-50%)',
-      background: 'rgba(16, 185, 129, 0.2)',
-      color: '#10b981',
-      border: 'none',
-      padding: '4px 8px',
-      borderRadius: '4px',
-      cursor: 'pointer',
-      fontSize: '1rem'
-    },
-
   };
 
   useEffect(() => {
@@ -93,17 +79,7 @@ function Vault() {
 
 
 
-  const copyCredentials = async (text) => {
-    if (!text || text === '[No Credentials]' || text === '[Decryption Failed]') return;
-    try {
-      await navigator.clipboard.writeText(text);
-setToast('[OK] Copied!');
-      setTimeout(() => setToast(''), 2000);
-    } catch {
-      setToast('❌ Copy failed');
-      setTimeout(() => setToast(''), 2000);
-    }
-  };
+
 
   const getDecryptedCredentials = (asset) => {
     const userEmail = user?.email || '';
@@ -231,13 +207,6 @@ setToast('[OK] Copied!');
                           >
                             {isShowing ? '🙈' : '👁️'}
                           </button>
-                          <button
-                            style={styles.copyButton}
-                            onClick={() => copyCredentials(decryptedCredentials)}
-                            title="Copy"
-                          >
-                            📋
-                          </button>
                         </div>
                       </div>
                       <div>
@@ -279,21 +248,7 @@ setToast('[OK] Copied!');
               })}
             </div>
           )}
-          {toast && (
-            <div style={{
-              position: 'fixed',
-              top: '20px',
-              right: '20px',
-              background: toast.includes('✅') ? '#10b981' : '#ef4444',
-              color: 'white',
-              padding: '12px 20px',
-              borderRadius: '8px',
-              boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
-              zIndex: 1000
-            }}>
-              {toast}
-            </div>
-          )}
+          {/* Toast removed - no longer used */}
         </div>
       </div>
     </div>

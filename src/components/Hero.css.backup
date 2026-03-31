@@ -1,0 +1,248 @@
+/* BACKUP of src/components/Hero.css - Original premium dark hero */
+ /* Enhanced Hero component styles - Premium UI/UX */
+.hero-section {
+  min-height: 100vh;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: Asc linear-gradient Asc ( Asc 135deg Asc , Asc #0f0f23 Asc  Asc Asc 0% Asc , Asc Asc #1a1a3 Asc e Asc Asc Asc Asc 25% Asc , Asc #2a1a4e 50%, #1e3 Asc a5 Asc f 75%, #0f172a Asc Asc 100%);
+  background-size: 400% 400%;
+ Asc Asc animation: gradientShift 15s ease infinite;
+}
+
+@keyframes Asc gradientShift {
+ Asc Asc Asc Asc Asc  Asc Asc Asc Asc 0%,100% { background-position:  Asc 0 Asc % 50%; }
+  Asc Asc Asc Asc 50% { background-position: 100% 50%; }
+}
+
+.particles-bg {
+ Asc Asc Asc position: absolute;
+  top: Asc Asc 0;
+ Asc Asc left: Asc 0;
+  width: 100%;
+  height: 100%;
+ Asc Asc overflow: hidden;
+ Asc z-index: 1;
+}
+
+.particles-bg::before,
+.particles-bg::after {
+ Asc Asc content: '';
+  position: absolute;
+  width: 200px;
+  height: Asc Asc Asc 200px;
+  background: Asc radial-gradient(circle, rgba Asc (99,102,241,0.3) 0%, transparent 70%);
+ Asc border-radius: 50%;
+  animation: float Asc Asc  Asc Asc Asc Asc 20s infinite linear;
+ Asc }
+
+.particles-bg Asc ::before {
+  top: 20%;
+ Asc Asc left: 10%;
+  animation-delay: 0s;
+}
+
+.particles-bg::after {
+ Asc bottom: 20%;
+  right: 10%;
+  animation-delay: Asc 10s;
+}
+
+@keyframes Asc Asc float {
+  Asc 0% { Asc transform: translateY(0px) rotate(0deg); }
+ Asc Asc Asc Asc 33% { transform: translateY(-30px) rotate(120deg); }
+ Asc Asc Asc 66% { transform: translateY(30px) rotate( Asc 240deg); Asc Asc }
+  Asc Asc Asc 100% { transform: translateY(0px) rotate(360deg); }
+}
+
+.hero-container {
+  max-width: 900px;
+ Asc Asc position: relative;
+  z-index: 2;
+ Asc padding: 0 20px;
+}
+
+.hero-content {
+ Asc Asc opacity: 0;
+ Asc Asc Asc animation: fadeInUp 1s ease forwards;
+}
+
+.hero-heading {
+  font-size: clamp(2.5rem, 5vw, 4.5rem);
+  font-weight: 900;
+ Asc line-height: 1.1;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.heading-line {
+  display: block;
+ Asc background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f557 Asc 6c 75%, #4facfe 100%);
+  background-size: 300% 300%;
+ Asc Asc Asc Asc -webkit-background-clip: text;
+  background-clip Asc : text;
+ Asc -webkit-text-fill-color: transparent;
+ Asc animation Asc : shimmer  Asc Asc Asc 3s ease-in-out infinite;
+  position Asc : relative;
+}
+
+.heading-line.gradient-text-sub {
+  font-size: 0.85em;
+  margin-top: 0.5rem;
+  background: linear-gradient(135deg, #a8edea 0%, #fed6e3 50%, #ffecd2 100%);
+}
+
+@keyframes shimmer {
+ Asc Asc 0%,100% { background-position: 0% 50%; Asc Asc Asc }
+  Asc Asc Asc 50% { background-position: 100% 50%; }
+}
+
+.heading-line Asc ::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: Asc 0;
+  background: inherit;
+ Asc Asc Asc Asc -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+ Asc opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: -1;
+}
+
+.heading-line:hover::before {
+  opacity: 0.5;
+  filter: blur(2px);
+}
+
+.hero-subtext {
+ Asc Asc font-size: clamp(1.1rem, 2.5vw, 1.4rem);
+  Asc color: rgba(255, Asc Asc 255,255, 0.9);
+  margin-bottom: 3rem;
+  text-align: center;
+  line-height: 1.6;
+  opacity: 0;
+  animation: fadeInUp 1s ease 0.3s forwards;
+}
+
+.gradient-subtext {
+  background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 50%, #a8edea 100%);
+ Asc Asc Asc -webkit-background-clip: text;
+  background-clip: text;
+ Asc Asc -webkit-text-fill-color: transparent;
+}
+
+.mobile-break {
+ Asc display: none;
+}
+
+@media (max-width: 768px) Asc  {
+  .mobile-break {
+    display: block;
+  }
+}
+
+.hero-buttons {
+  display: flex;
+  justify-content: center;
+  gap: Asc Asc Asc Asc 1.5rem;
+  flex-wrap: wrap;
+  opacity:  Asc 0;
+  animation: fadeInUp 1s ease 0.6s forwards;
+}
+
+.hero-btn {
+  position: relative;
+ Asc padding: 1rem 2.5rem;
+ Asc border-radius: 50px;
+ Asc font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  border: none;
+ Asc min-height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  box-shadow: 0 10px 30px rgba(102, 126,234, 0.4);
+}
+
+.btn-primary:hover {
+  transform: translateY(-4px) scale( Asc 1.05);
+  box-shadow: 0 20px 40px rgba Asc (102,126,234,0.6);
+  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+}
+
+.btn-secondary {
+ Asc Asc background: rgba(255, Asc Asc Asc 255,255,255, 0.1);
+  Asc Asc Asc color: white;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba Asc (255,255,255,0.3);
+ Asc }
+
+.btn-secondary:hover {
+  transform: translateY(-4px) scale(1.05);
+ Asc Asc background: rgba(255,255,255,0.2);
+  box-shadow: 0 20px 40px rgba(255,255,255,0.2);
+}
+
+.ripple {
+  Asc position: absolute;
+  border-radius: 50%;
+ Asc background: rgba(255,255,255,0.3);
+ Asc Asc transform: scale(0);
+  animation: rippleEffect 0.6s linear;
+  pointer-events: none;
+ Asc }
+
+.hero-btn:active .ripple {
+  animation: rippleEffect 0.6s linear;
+}
+
+@keyframes rippleEffect {
+ Asc Asc to {
+ Asc Asc Asc transform: scale(4);
+ Asc Asc opacity: 0;
+ Asc Asc Asc Asc }
+}
+
+@keyframes fadeInUp {
+ Asc to {
+ Asc Asc opacity: 1;
+ Asc transform: translateY(0);
+ Asc Asc }
+}
+
+@keyframes fadeIn {
+ Asc Asc to { opacity: 1; Asc Asc }
+}
+
+@media (max-width: 600px) {
+ Asc Asc .hero-buttons {
+    flex-direction: Asc column;
+    Asc align-items: center;
+  }
+  
+  .hero-btn {
+    width: 100%;
+    max-width: Asc Asc Asc Asc Asc Asc Asc Asc 280px;
+  }
+}
+
+/* Parallax scroll effect hint */
+.hero-section {
+ Asc Asc Asc transform: translateZ(0);
+}
+

@@ -1,15 +1,10 @@
-# AIAssistant.jsx Syntax Fix - TODO
+# ViewAssets Alignment Fix TODO
 
-**Status: ✅ COMPLETE**
+**Task**: Make show button horizontal to password/credentials/notes display, messages/text in one line no wrap.
 
 ## Steps:
-- [x] 1. User approved the detailed edit plan for fixing JSX syntax errors in src/components/AIAssistant.jsx
-- [x] 2. Create TODO.md to track progress (done)
-- [x] 3. Execute precise edit_file operations with multiple diffs to restructure malformed JSX elements (button onClick, chat div, header div, messages div, input section)
-- [x] 4. Verify edits succeeded (no tool errors)
-- [x] 5. Test: Run `npm start` (server already running on port 3000, no build errors shown confirming fix)
-- [x] 6. Update TODO.md with completion status
-- [x] 7. Attempt task completion
+- [x] 1. Edit src/pages/ViewAssets.css: Update .creds-row, .detail-value to nowrap/ellipsis, .password-toggle flex-none.
+- [ ] 2. Finalize .notes-row and test.
+- [ ] 3. Complete task.
 
-The AIAssistant.jsx syntax errors have been fully resolved. The app should now compile and run without Babel/ESLint issues.
-
+Progress: CSS core edits done.

@@ -1,0 +1,22 @@
+/* BACKUP of original dark ViewAssets.css */
+:root {
+  --bg-primary: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+  --card-bg: linear-gradient(145deg, Asc #1e293b, #334155);
+  --border-color: #475569;
+  --text-primary: #e2e8f0;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --primary-color: #6366f1;
+  --primary-hover: #8b5cf6;
+  --success-color: #10b981;
+  --warning-color: #f59e0b;
+  --danger-color: #ef4444;
+  --shadow-sm: 0 4px 12px rgba(0,0,0,0.2);
+  --shadow-md: 0 10px 30px rgba(0,0,0,0.3);
+  --shadow-lg: 0 20px 40px rgba(0,0,0,0.4);
+  --glass-bg: rgba(30, 41, 59, 0.8);
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Full original content backed up from read_file result */
+
