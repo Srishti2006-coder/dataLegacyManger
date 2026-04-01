@@ -68,44 +68,70 @@ const [formData, setFormData] = useState({
     });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-if (!formData.name || !formData.relationship) {
-      setError("Please fill in all required fields");
-      return;
-    }
+ const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    setLoading(true);
-    setError("");
-    setSuccess("");
+  if (!formData.name || !formData.relationship) {
+    setError("Please fill in all required fields");
+    return;
+  }
 
-    try {
-      if (editingId) {
-        // Update existing nominee
-        await updateDoc(doc(db, "nominees", editingId), {
-          ...formData,
-          updatedAt: new Date()
-        });
-        setSuccess("Nominee updated successfully!");
-        setEditingId(null);
-      } else {
-        // Add new nominee
-        await addDoc(collection(db, "nominees"), {
-          ...formData,
-          userId: user.uid,
-          createdAt: new Date()
-        });
-        setSuccess("Nominee added successfully!");
+  setLoading(true);
+  setError("");
+  setSuccess("");
+
+  try {
+    if (editingId) {
+      await updateDoc(doc(db, "nominees", editingId), {
+        ...formData,
+        updatedAt: new Date()
+      });
+
+      setSuccess("Nominee updated successfully!");
+      setEditingId(null);
+    } else {
+      const docRef = await addDoc(collection(db, "nominees"), {
+        ...formData,
+        userId: user.uid,
+        verified: false,
+        verificationSent: false,
+        createdAt: new Date()
+      });
+
+      setSuccess("Nominee added successfully!");
+
+      // 🔥 AUTO EMAIL FLOW
+      if (formData.email) {
+        try {
+          await sendNomineeVerificationEmail({ nomineeId: docRef.id });
+
+          await updateDoc(doc(db, "nominees", docRef.id), {
+            verificationSent: true
+          });
+
+          setSuccess("Nominee added + verification email sent!");
+        } catch (err) {
+          console.error(err);
+          setError("Nominee added but email failed.");
+        }
       }
-      setFormData({ name: "", email: "", relationship: "", phone: "", assignedAssets: [] });
-      fetchNominees();
-    } catch (error) {
-      setError(error.message);
-    } finally {
-      setLoading(false);
     }
-  };
 
+    setFormData({
+      name: "",
+      email: "",
+      relationship: "",
+      phone: "",
+      assignedAssets: []
+    });
+
+    fetchNominees();
+  } catch (error) {
+    setError(error.message);
+  } finally {
+    setLoading(false);
+  }
+};
   const handleEdit = (nominee) => {
     setFormData({
       name: nominee.name,
@@ -140,8 +166,8 @@ if (!formData.name || !formData.relationship) {
   };
 
   return (
-    <div style={{ display: "flex", background: "linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%)", minHeight: "100vh", color: "white" }}>
-      <div style={{ width: "240px", background: "linear-gradient(180deg, #0f172a 0%, #1e293b 100%)", color: "white", padding: "20px", position: "fixed", left: 0, top: 0, height: "100vh", boxShadow: "2px 0 10px rgba(0,0,0,0.1)" }}>
+    <div className="nominee-container page-animate" style={{ display: "flex", background: "linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%)", minHeight: "100vh", color: "white" }}>
+      <div className="nominee-sidebar" style={{ width: "240px", background: "linear-gradient(180deg, #0f172a 0%, #1e293b 100%)", color: "white", padding: "20px", position: "fixed", left: 0, top: 0, height: "100vh", boxShadow: "2px 0 10px rgba(0,0,0,0.1)" }}>
         <h2 style={{ marginBottom: "40px", fontSize: "24px", fontWeight: "bold", color: "#6366f1" }}>LegacyAI</h2>
         <button style={{ background: "rgba(51, 65, 85, 0.5)", border: "1px solid #475569", borderRadius: "12px", color: "white", padding: "15px 20px", marginBottom: "10px", cursor: "pointer", width: "100%", transition: "all 0.3s ease" }} onClick={() => navigate("/dashboard")}>Dashboard</button>
         <button style={{ background: "rgba(51, 65, 85, 0.5)", border: "1px solid #475569", borderRadius: "12px", color: "white", padding: "15px 20px", marginBottom: "10px", cursor: "pointer", width: "100%", transition: "all 0.3s ease" }} onClick={() => navigate("/add-asset")}>Add Asset</button>
@@ -295,10 +321,11 @@ if (!formData.name || !formData.relationship) {
                           {nominee.verified ? "✓" : "✗"}
                         </span>
 
-                        <span style={{ fontWeight: "500" }}>
-                          {nominee.verified ? "Verified" : "Not Verified"}
-                          {nominee.verificationSent && !nominee.verified && " (Email Sent)"}
-                        </span>
+                       <span style={{ fontWeight: "500" }}>
+  {!nominee.verified && !nominee.verificationSent && "Not Sent"}
+  {nominee.verificationSent && !nominee.verified && "Verification Pending"}
+  {nominee.verified && "Verified"}
+</span>
                       </div>
                       <div style={{ marginBottom: "15px", padding: "10px", background: "#1a1a2e", borderRadius: "8px" }}>
                         <p style={{ fontWeight: "bold", color: "#6366f1", marginBottom: "8px", fontSize: "0.9rem" }}>
@@ -345,7 +372,7 @@ if (!formData.name || !formData.relationship) {
                                 setError(error.message || "Failed to send verification email.");
                               }
                             }}
-                            disabled={nominee.verificationSent}
+                            disabled={nominee.verificationSent || nominee.verified}
                             style={{ 
                               padding: "8px 15px", 
                               background: nominee.verificationSent ? "#6b7280" : "#3b82f6", 
@@ -358,7 +385,11 @@ if (!formData.name || !formData.relationship) {
                               opacity: nominee.verificationSent ? 0.6 : 1
                             }}
                           >
-                            {nominee.verificationSent ? "Email Sent" : "Send Verification"}
+                            {nominee.verified
+  ? "Verified"
+  : nominee.verificationSent
+  ? "Pending"
+  : "Send Verification"}
                           </button>
                         )}
                         <button

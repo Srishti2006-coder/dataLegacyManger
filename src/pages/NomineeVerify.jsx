@@ -1,8 +1,6 @@
-
 import { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { onAuthStateChanged } from "firebase/auth";
-import { auth, verifyNomineeToken } from "../services/firebase";
+import { verifyNomineeToken } from "../services/firebase";
 
 function NomineeVerify() {
   const [searchParams] = useSearchParams();
@@ -10,30 +8,13 @@ function NomineeVerify() {
 
   const [status, setStatus] = useState("verifying");
   const [error, setError] = useState("");
-  const [user, setUser] = useState(null);
 
   const token = searchParams.get("token");
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-    });
-
-    return () => unsubscribe();
-  }, []);
 
   useEffect(() => {
     if (!token) {
       setStatus("invalid");
       setError("No verification token found.");
-      return;
-    }
-
-    if (!user) {
-      navigate(
-        `/login?redirect=nominee-verify&token=${encodeURIComponent(token)}`,
-        { replace: true }
-      );
       return;
     }
 
@@ -45,16 +26,17 @@ function NomineeVerify() {
 
         setStatus("success");
       } catch (err) {
+        console.error(err);
         setError(err.message || "Verification failed.");
         setStatus("error");
       }
     };
 
     verify();
-  }, [token, user, navigate]);
+  }, [token]);
 
   return (
-    <div style={{
+    <div className="nominee-verify-container page-animate" style={{
       background: "linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%)",
       minHeight: "100vh",
       color: "white",
@@ -62,7 +44,7 @@ function NomineeVerify() {
       alignItems: "center",
       justifyContent: "center"
     }}>
-      <div style={{
+      <div className="nominee-verify-card" style={{
         maxWidth: "500px",
         width: "100%",
         background: "#1e293b",
@@ -75,9 +57,7 @@ function NomineeVerify() {
         {status === "success" && (
           <>
             <h2 style={{ color: "#10b981" }}>Verified 🎉</h2>
-            <button onClick={() => navigate("/emergency-access")}>
-              Request Emergency Access
-            </button>
+            <p>You are now a verified nominee.</p>
           </>
         )}
 
@@ -85,9 +65,6 @@ function NomineeVerify() {
           <>
             <h2 style={{ color: "red" }}>Error</h2>
             <p>{error}</p>
-            <button onClick={() => navigate("/login")}>
-              Back
-            </button>
           </>
         )}
       </div>

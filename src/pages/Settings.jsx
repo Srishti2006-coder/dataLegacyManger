@@ -170,7 +170,7 @@ Auto Logout,${settings.autoLogout}`;
   return (
     <div className="settings-container">
       <Sidebar />
-      <div className="settings-main">
+      <div className="settings-main page-animate">
         <div className="max-w-4xl mx-auto">
           {/* Header */}
           <div className="settings-header">

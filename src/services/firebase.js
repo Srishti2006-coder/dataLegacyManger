@@ -1,7 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
-import { getFunctions, httpsCallable } from "firebase/functions";
+import { getFunctions, httpsCallable, connectFunctionsEmulator } from "firebase/functions";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBjq4cg1reo7Adwf7TSP-ktO_g3xRNtwvU",
@@ -23,6 +23,13 @@ export const db = getFirestore(app);
 
 // cloud functions
 const functions = getFunctions(app);
+
+// 🔌 Connect to LOCAL EMULATOR if on localhost (for development)
+if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+connectFunctionsEmulator(functions, "127.0.0.1", 5002);
+  console.log('🚀 Connected to Functions Emulator (localhost:5001)');
+}
+
 export const sendNomineeVerificationEmail = httpsCallable(functions, "sendNomineeVerificationEmail");
 export const verifyNomineeToken = httpsCallable(functions, "verifyNomineeToken");
 

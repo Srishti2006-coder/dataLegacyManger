@@ -39,7 +39,7 @@ function Login() {
 
   return (
     <div className="auth-container">
-      <div className="auth-card auth-form">
+      <div className="auth-card auth-form page-animate">
         <h2 className="auth-title">Welcome Back</h2>
 
         <div className="auth-input-group">

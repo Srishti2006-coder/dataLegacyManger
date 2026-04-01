@@ -57,7 +57,7 @@ function Dashboard() {
       <Sidebar />
 
       {/* Main Content */}
-      <div className="ml-[260px] p-10 w-full text-white dark:text-slate-900 bg-slate-900/50 dark:bg-white/50 min-h-[calc(100vh-80px)]">
+      <div className="ml-[260px] p-10 w-full text-white dark:text-slate-900 bg-slate-900/50 dark:bg-white/50 min-h-[calc(100vh-80px)] page-animate">
 
         <div className="dashboard-header">
           <div>

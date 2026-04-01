@@ -72,7 +72,7 @@ setSuccess('[OK] Asset saved securely!');
   return (
     <div className="add-asset-container">
       <Sidebar />
-      <div className="add-asset-main">
+      <div className="add-asset-main page-animate">
         <div className="add-asset-card">
           <div className="add-asset-header">
             <h1 className="add-asset-title">Add Asset</h1>

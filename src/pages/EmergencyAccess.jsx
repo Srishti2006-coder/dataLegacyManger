@@ -78,7 +78,7 @@ function EmergencyAccess() {
   return (
     <div style={{ display: "flex", background: "linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%)", minHeight: "100vh", color: "white" }}>
       <Sidebar />
-      <div style={{ marginLeft: "260px", padding: "40px", width: "100%" }}>
+      <div className="emergency-main page-animate" style={{ marginLeft: "260px", padding: "40px", width: "100%" }}>
         <div style={{ maxWidth: "1000px", margin: "0 auto" }}>
           <h1 style={{ fontSize: "2.5rem", marginBottom: "10px", textAlign: "center", textShadow: "0 0 20px rgba(239, 68, 68, 0.5)" }}>
 Emergency Access

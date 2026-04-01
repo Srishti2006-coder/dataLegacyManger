@@ -157,7 +157,7 @@ setToast('Error deleting nominee: ' + error.message);
   return (
     <div className="view-assets-container bg-slate-900 text-white dark:bg-white dark:text-slate-900">
       <Sidebar />
-      <div className="view-assets-main bg-slate-900/50 dark:bg-white/50">
+      <div className="view-assets-main bg-slate-900/50 dark:bg-white/50 page-animate">
         {toast && <div className="toast">{toast}</div>}
 
         <div className="view-assets-header">

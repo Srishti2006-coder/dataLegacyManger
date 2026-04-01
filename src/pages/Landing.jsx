@@ -3,7 +3,7 @@ import Hero from "../components/Hero";
 
 function Landing() {
   return (
-    <div className="landing-container">
+    <div className="landing-container page-animate">
       <Navbar />
 
       <Hero />

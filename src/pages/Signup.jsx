@@ -50,7 +50,7 @@ const handleSignup = async () => {
 
 return(
   <div className="full-screen-auth-container">
-  <div className="minimal-auth-form">
+  <div className="minimal-auth-form page-animate">
 
     <h2 className="simple-title">Create Account</h2>
     <p className="simple-subtitle">Safeguard your digital legacy for generations to come.</p>

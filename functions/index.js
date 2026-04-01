@@ -9,16 +9,20 @@ const db = admin.firestore();
 
 // 🔐 JWT secret
 const JWT_SECRET =
-  functions.config().app.secret ||
+  functions.config().app?.secret ||
   process.env.JWT_SECRET ||
   "default-super-secret-key-change-me";
 
-// 📩 Gmail transporter (Nodemailer)
+// 🌍 FRONTEND URL (CHANGE ONLY THIS WHEN DEPLOYING)
+const FRONTEND_URL = "http://127.0.0.1:3000"; 
+// 👉 deploy ke baad: https://your-app.vercel.app
+
+// 📩 Gmail transporter
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
-    user: "srishtibansal505@gmail.com",        // 👈 change this
-    pass: "duovpbvitkpxvoyf"            // 👈 Gmail App Password
+    user: "srishtibansal505@gmail.com",
+    pass: "duovpbvitkpxvoyf"
   }
 });
 
@@ -28,30 +32,31 @@ const transporter = nodemailer.createTransport({
 // ================================
 exports.sendNomineeVerificationEmail = functions.https.onCall(
   async (data, context) => {
+
+    console.log("🔥 FUNCTION STARTED:", data);
+
     if (!context.auth) {
       throw new functions.https.HttpsError(
         "unauthenticated",
-        "Must be authenticated."
+        "Login required"
       );
     }
 
     const { nomineeId } = data;
+
     if (!nomineeId) {
       throw new functions.https.HttpsError(
         "invalid-argument",
-        "nomineeId required."
+        "nomineeId required"
       );
     }
 
     try {
-      // Fetch nominee
+      // 📄 Get nominee
       const nomineeDoc = await db.collection("nominees").doc(nomineeId).get();
 
       if (!nomineeDoc.exists) {
-        throw new functions.https.HttpsError(
-          "not-found",
-          "Nominee not found."
-        );
+        throw new functions.https.HttpsError("not-found", "Nominee not found");
       }
 
       const nominee = nomineeDoc.data();
@@ -59,71 +64,57 @@ exports.sendNomineeVerificationEmail = functions.https.onCall(
       if (!nominee.email) {
         throw new functions.https.HttpsError(
           "invalid-argument",
-          "Nominee email required."
+          "Email required"
         );
       }
 
-      // 🔐 Create JWT token
+      // 🔐 Create token
       const token = jwt.sign(
         { nomineeId, email: nominee.email },
         JWT_SECRET,
         { expiresIn: "7d" }
       );
 
-      const origin =
-        functions.config().app.origin || "http://localhost:3000";
+      const verificationUrl = `${FRONTEND_URL}/nominee-verify?token=${token}`;
 
-      const verificationUrl = `${origin}/nominee-verify?token=${token}`;
+      console.log("📧 Sending email to:", nominee.email);
+      console.log("🔗 URL:", verificationUrl);
 
-      // ✉️ SEND EMAIL (Nodemailer)
+      // 📩 Send email
       await transporter.sendMail({
-        from: `Legacy AI <YOUR_EMAIL@gmail.com>`,
+        from: `Legacy AI <srishtibansal505@gmail.com>`,
         to: nominee.email,
-        subject: "You are selected as Nominee - Verification Required",
+        subject: "Verify Nominee",
         html: `
-          <div style="font-family: Arial, sans-serif; max-width: 600px;">
-            <h2>Congratulations 🎉</h2>
-            <p>Hello <b>${nominee.name}</b>,</p>
-            <p>You have been selected as a nominee for digital assets.</p>
+          <h2>Hello ${nominee.name}</h2>
+          <p>You are added as nominee.</p>
 
-            <p>Please verify your status by clicking below:</p>
+          <a href="${verificationUrl}" 
+             style="padding:10px 20px;
+                    background:#4f46e5;
+                    color:white;
+                    text-decoration:none;
+                    border-radius:5px;">
+             Verify Now
+          </a>
 
-            <a href="${verificationUrl}" 
-               style="display:inline-block;
-                      padding:12px 20px;
-                      background:#4f46e5;
-                      color:#fff;
-                      text-decoration:none;
-                      border-radius:8px;">
-              Verify Now
-            </a>
-
-            <p style="margin-top:20px;">
-              This link will expire in 7 days.
-            </p>
-
-            <hr />
-            <small>DataLegacyManager - Secure Digital Legacy System</small>
-          </div>
+          <p>Valid for 7 days</p>
         `
       });
 
-      // Update Firestore flag
+      console.log("✅ EMAIL SENT");
+
+      // 🔄 Update Firestore
       await db.collection("nominees").doc(nomineeId).update({
         verificationSent: true,
         verificationSentAt: admin.firestore.FieldValue.serverTimestamp()
       });
 
-      return {
-        success: true,
-        message: "Verification email sent successfully!"
-      };
-    } catch (error) {
-      console.error("Send verification error:", error);
-      throw new functions.https.HttpsError(
-        "internal",
-        error.message
-      );
+      return { success: true };
+
+    } catch (err) {
+      console.error("❌ ERROR:", err);
+      throw new functions.https.HttpsError("internal", err.message);
     }
   }
 );
@@ -134,65 +125,82 @@ exports.sendNomineeVerificationEmail = functions.https.onCall(
 // ================================
 exports.verifyNomineeToken = functions.https.onCall(
   async (data, context) => {
-    if (!context.auth) {
-      throw new functions.https.HttpsError(
-        "unauthenticated",
-        "Must sign in with Google."
-      );
-    }
+
+    console.log("🔍 VERIFY FUNCTION STARTED");
 
     const { token } = data;
+
     if (!token) {
       throw new functions.https.HttpsError(
         "invalid-argument",
-        "Token required."
+        "Token required"
       );
     }
 
     try {
-      // Verify JWT
+      // 🔐 Verify token
       const decoded = jwt.verify(token, JWT_SECRET);
-      const { nomineeId, email: storedEmail } = decoded;
+      const { nomineeId, email } = decoded;
 
-      const userEmail = context.auth.token.email;
+      console.log("✅ TOKEN VERIFIED:", nomineeId);
 
-      // Security check
-      if (userEmail !== storedEmail) {
-        throw new functions.https.HttpsError(
-          "permission-denied",
-          "Email mismatch."
-        );
-      }
-
-      // Mark verified
+      // 🔄 Update Firestore
       await db.collection("nominees").doc(nomineeId).update({
         verified: true,
         verifiedAt: admin.firestore.FieldValue.serverTimestamp(),
-        verifiedBy: userEmail
+        verifiedBy: email
       });
 
       return {
         success: true,
-        message: "Nominee verified successfully!",
-        nomineeId
+        message: "Verified successfully"
       };
-    } catch (error) {
-      console.error("Verify token error:", error);
 
-      if (
-        error.name === "TokenExpiredError" ||
-        error.name === "JsonWebTokenError"
-      ) {
-        throw new functions.https.HttpsError(
-          "invalid-argument",
-          "Invalid or expired token."
-        );
-      }
+    } catch (error) {
+      console.error("❌ VERIFY ERROR:", error);
 
       throw new functions.https.HttpsError(
-        "internal",
-        "Verification failed."
+        "invalid-argument",
+        "Invalid or expired token"
       );
     }
   }
 );
+
+exports.sendNomineeEmail = functions.firestore
+  .document("nominees/{id}")
+  .onCreate(async (snap, context) => {
+
+    console.log("🔥 FIRESTORE TRIGGER FIRED");
+
+    const nominee = snap.data();
+
+    if (!nominee.email) {
+      console.log("❌ No email found");
+      return;
+    }
+
+    try {
+      console.log("📧 Sending email to:", nominee.email);
+
+      await transporter.sendMail({
+        from: "Legacy AI <srishtibansal505@gmail.com>",
+        to: nominee.email,
+        subject: "You are added as Nominee",
+        html: `
+          <h2>Hello ${nominee.name}</h2>
+          <p>You have been added as a nominee.</p>
+        `
+      });
+
+      console.log("✅ EMAIL SENT");
+
+      await db.collection("nominees").doc(context.params.id).update({
+        emailSent: true,
+        emailSentAt: admin.firestore.FieldValue.serverTimestamp()
+      });
+
+    } catch (err) {
+      console.error("❌ EMAIL ERROR:", err);
+    }
+  });

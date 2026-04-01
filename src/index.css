@@ -781,3 +781,17 @@ html{
   background: rgba(99, 102, 241, 0.3);
   border-color: #6366f1;
 }
+
+/* Global Page Fade-In Animation */
+.page-animate {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: pageFadeIn 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.3s both;
+}
+
+@keyframes pageFadeIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

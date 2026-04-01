@@ -123,7 +123,7 @@ function Vault() {
   return (
     <div style={{ display: "flex", background: "linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%)", minHeight: "100vh", color: "white" }}>
       <Sidebar />
-      <div style={{ marginLeft: "260px", padding: "40px", width: "100%" }}>
+      <div className="vault-main page-animate" style={{ marginLeft: "260px", padding: "40px", width: "100%" }}>
         <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
           <h1 style={{ fontSize: "2.5rem", marginBottom: "10px", textAlign: "center", textShadow: "0 0 20px rgba(99, 102, 241, 0.5)" }}>
             Secure Vault
