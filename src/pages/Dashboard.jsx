@@ -1,4 +1,5 @@
 
+
 import Sidebar from "../layout/Sidebar";
 import AIAssistant from "../components/AIAssistant";
 import { auth, db } from "../services/firebase";
@@ -6,6 +7,8 @@ import { useNavigate } from "react-router-dom";
 import { signOut } from "firebase/auth";
 import { useState, useEffect } from "react";
 import { collection, query, where, onSnapshot } from "firebase/firestore";
+import "./Dashboard.css";
+import "../components/DashboardCard.css";
 
 function Dashboard() {
 
@@ -50,16 +53,13 @@ function Dashboard() {
   };
 
   return (
-
-    <div className="flex bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 dark:from-white dark:via-slate-50 dark:to-white min-h-screen dark:text-slate-900 text-white">
-
+    <div className="dashboard-root">
       {/* Sidebar */}
       <Sidebar />
 
       {/* Main Content */}
-      <div className="ml-[260px] p-10 w-full text-white dark:text-slate-900 bg-slate-900/50 dark:bg-white/50 min-h-[calc(100vh-80px)] page-animate">
-
-        <div className="dashboard-header">
+        <div className="dashboard-main">
+          <div className="dashboard-header">
           <div>
             <h1 className="dashboard-title">Dashboard</h1>
             <p className="dashboard-user">Welcome {user?.email}</p>

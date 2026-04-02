@@ -1,0 +1,19 @@
+/* Dashboard page layout styles - fixes sidebar overlap */
+.dashboard-main {
+  margin-left: 260px;
+  padding: 40px;
+  width: calc(100% - 260px);
+  min-height: 100vh;
+}
+
+.dashboard-root {
+  display: flex;
+}
+
+@media (max-width: 768px) {
+  .dashboard-main {
+    margin-left: 0;
+    padding: 20px;
+    width: 100%;
+  }
+}

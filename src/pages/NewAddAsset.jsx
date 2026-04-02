@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback } from 'react';
 import { auth, db } from '../services/firebase';
 import { encryptField } from '../services/encryption';
@@ -171,4 +172,3 @@ setSuccess('Asset saved securely!');
 }
 
 export default AddAsset;
-

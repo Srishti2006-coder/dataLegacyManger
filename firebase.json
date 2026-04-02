@@ -18,7 +18,7 @@
       }
     ]
   },
- "emulators": {
+"emulators": {
   "functions": {
     "port": 5001
   },
@@ -29,5 +29,4 @@
     "enabled": true,
     "port": 4000
   }
-}
-}
+}}

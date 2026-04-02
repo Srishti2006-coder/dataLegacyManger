@@ -1,10 +1,12 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+/** Restored Stable App.js - Static Imports, Simple Routing, Basic Auth Guard */
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { auth } from "./services/firebase";
 
+// Static imports for all pages - no lazy loading
 import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
-
 import AddAsset from "./pages/AddAsset";
 import ViewAssets from "./pages/ViewAssets";
 import Nominee from "./pages/Nominee";
@@ -14,64 +16,80 @@ import Vault from "./pages/Vault";
 import Will from "./pages/Will";
 import NomineeVerify from "./pages/NomineeVerify";
 import EmergencyAccess from "./pages/EmergencyAccess";
-import { auth } from "./services/firebase";
-import { signOut } from "firebase/auth";
-import { useNavigate } from "react-router-dom";
-import { useEffect, useCallback } from "react";
 
-function AppContent() {
-  const navigate = useNavigate();
-  let logoutTimer;
-
-  const resetTimer = useCallback(() => {
-    if (logoutTimer) clearTimeout(logoutTimer);
-    const saved = localStorage.getItem('datalegacy-settings');
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      if (parsed.autoLogout && parsed.autoLogout !== 'never') {
-        const times = { '5min': 5*60*1000, '15min': 15*60*1000, '30min': 30*60*1000, '1hr': 60*60*1000 };
-        logoutTimer = setTimeout(() => {
-          signOut(auth).then(() => navigate('/login'));
-        }, times[parsed.autoLogout]);
-      }
-    }
-  }, [navigate]);
-
-  useEffect(() => {
-    const events = ['mousemove', 'keydown', 'mousedown', 'scroll'];
-    events.forEach(event => document.addEventListener(event, resetTimer));
-    resetTimer();
-    return () => {
-      events.forEach(event => document.removeEventListener(event, resetTimer));
-      if (logoutTimer) clearTimeout(logoutTimer);
-    };
-  }, [resetTimer]);
-
-  return (
-    <Routes>
-      <Route path="/" element={<Landing />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/signup" element={<Signup />} />
-      <Route path="/dashboard" element={<Dashboard />} />
-      <Route path="/add-asset" element={<AddAsset />} />
-      <Route path="/view-assets" element={<ViewAssets />} />
-      <Route path="/nominee" element={<Nominee />} />
-      <Route path="/profile" element={<Profile />} />
-      <Route path="/settings" element={<Settings />} />
-      <Route path="/vault" element={<Vault />} />
-      <Route path="/will" element={<Will />} />
-      <Route path="/nominee-verify" element={<NomineeVerify />} />
-      <Route path="/emergency-access" element={<EmergencyAccess />} />
-    </Routes>
-  );
+// Simple ProtectedRoute component for basic auth guard
+function ProtectedRoute({ children }) {
+  const user = auth.currentUser;
+  return user ? children : <Navigate to="/login" replace />;
 }
 
 function App() {
   return (
     <Router>
-      <AppContent />
+      <Routes>
+        {/* Public routes */}
+        <Route path="/" element={<Landing />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+        
+        {/* Protected routes */}
+        <Route path="/dashboard" element={
+          <ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>
+        } />
+        <Route path="/add-asset" element={
+          <ProtectedRoute>
+            <AddAsset />
+          </ProtectedRoute>
+        } />
+        <Route path="/view-assets" element={
+          <ProtectedRoute>
+            <ViewAssets />
+          </ProtectedRoute>
+        } />
+        <Route path="/nominee" element={
+          <ProtectedRoute>
+            <Nominee />
+          </ProtectedRoute>
+        } />
+        <Route path="/nominee-verify" element={
+          <ProtectedRoute>
+            <NomineeVerify />
+          </ProtectedRoute>
+        } />
+        <Route path="/profile" element={
+          <ProtectedRoute>
+            <Profile />
+          </ProtectedRoute>
+        } />
+        <Route path="/settings" element={
+          <ProtectedRoute>
+            <Settings />
+          </ProtectedRoute>
+        } />
+        <Route path="/vault" element={
+          <ProtectedRoute>
+            <Vault />
+          </ProtectedRoute>
+        } />
+        <Route path="/will" element={
+          <ProtectedRoute>
+            <Will />
+          </ProtectedRoute>
+        } />
+        <Route path="/emergency-access" element={
+          <ProtectedRoute>
+            <EmergencyAccess />
+          </ProtectedRoute>
+        } />
+        
+        {/* Catch all */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
     </Router>
   );
 }
 
 export default App;
+

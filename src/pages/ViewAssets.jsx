@@ -3,10 +3,10 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { auth, db } from "../services/firebase";
 import { decryptField } from "../services/encryption";
-import { collection, getDocs, query, where, deleteDoc, doc, updateDoc } from "firebase/firestore";
+import { collection, query, where, onSnapshot, deleteDoc, doc, updateDoc } from "firebase/firestore";
 import './ViewAssets.css';
-import Sidebar from "../layout/Sidebar";
 import { useNavigate } from "react-router-dom";
+import Sidebar from "../layout/Sidebar";
 
 function ViewAssets() {
   const navigate = useNavigate();
@@ -31,20 +31,22 @@ function ViewAssets() {
     }
   }, []);
 
+  // Real-time listeners
   useEffect(() => {
-    fetchData();
-  }, []);
-
-  const fetchData = async () => {
     if (!auth.currentUser) return;
-    setLoading(true);
-    try {
-      const assetsQuery = query(
-        collection(db, "assets"),
-        where("userId", "==", auth.currentUser.uid)
-      );
-      const assetsSnapshot = await getDocs(assetsQuery);
-      const assetsData = assetsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+    console.log("🔄 Setting up real-time listeners...");
+    
+    const assetsQuery = query(
+      collection(db, "assets"),
+      where("userId", "==", auth.currentUser.uid)
+    );
+    
+    const assetsUnsubscribe = onSnapshot(assetsQuery, (snapshot) => {
+      const assetsData = snapshot.docs.map(doc => ({ 
+        id: doc.id, 
+        ...doc.data() 
+      }));
 
       const userEmail = auth.currentUser?.email || '';
       const processedAssets = assetsData.map(asset => {
@@ -56,24 +58,36 @@ function ViewAssets() {
       }).sort((a, b) => {
         const dateA = a.createdAt?.seconds ? new Date(a.createdAt.seconds * 1000) : new Date(0);
         const dateB = b.createdAt?.seconds ? new Date(b.createdAt.seconds * 1000) : new Date(0);
-        return dateB - dateA; // descending by added date
+        return dateB - dateA;
       });
 
-      const nomineesQuery = query(
-        collection(db, "nominees"),
-        where("userId", "==", auth.currentUser.uid)
-      );
-      const nomineesSnapshot = await getDocs(nomineesQuery);
-      const nomineesData = nomineesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
       setAssets(processedAssets);
-      setNominees(nomineesData);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    } finally {
       setLoading(false);
-    }
-  };
+    }, (error) => {
+      console.error("Assets listener error:", error);
+      setLoading(false);
+    });
+
+    const nomineesQuery = query(
+      collection(db, "nominees"),
+      where("userId", "==", auth.currentUser.uid)
+    );
+    
+    const nomineesUnsubscribe = onSnapshot(nomineesQuery, (snapshot) => {
+      const nomineesData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setNominees(nomineesData);
+    }, (error) => {
+      console.error("Nominees listener error:", error);
+    });
+
+    return () => {
+      console.log("🧹 Cleaning up real-time listeners");
+      assetsUnsubscribe();
+      nomineesUnsubscribe();
+    };
+  }, [auth.currentUser]);
+
+  // fetchData removed - replaced by real-time listeners
 
   const filteredAssets = assets.filter(asset =>
     asset.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -114,7 +128,6 @@ function ViewAssets() {
       });
       setEditingNominee(null);
       setEditForm({ name: "", email: "", relationship: "", phone: "" });
-      fetchData();
 setToast('[OK] Nominee updated successfully!');
     } catch (error) {
 setToast('Error updating nominee: ' + error.message);
@@ -125,7 +138,6 @@ setToast('Error updating nominee: ' + error.message);
     if (window.confirm("Are you sure you want to delete this nominee?")) {
       try {
         await deleteDoc(doc(db, "nominees", nomineeId));
-        fetchData();
 setToast('[OK] Nominee deleted successfully!');
       } catch (error) {
 setToast('Error deleting nominee: ' + error.message);
@@ -140,8 +152,9 @@ setToast('Error deleting nominee: ' + error.message);
 
   if (loading) {
   return (
-    <div className="view-assets-container bg-slate-900 text-white dark:bg-white dark:text-slate-900">
+    <div className="dashboard-root">
       <Sidebar />
+      <div className="view-assets-container bg-slate-900 text-white dark:bg-white dark:text-slate-900"> 
       <div className="view-assets-main bg-slate-900/50 dark:bg-white/50">
 
           <div className="empty-state">
@@ -150,15 +163,16 @@ setToast('Error deleting nominee: ' + error.message);
 
           </div>
         </div>
+    </div>
       </div>
-    );
-  }
+  );
+}
 
   return (
-    <div className="view-assets-container bg-slate-900 text-white dark:bg-white dark:text-slate-900">
+    <div className="dashboard-root">
       <Sidebar />
-      <div className="view-assets-main bg-slate-900/50 dark:bg-white/50 page-animate">
-        {toast && <div className="toast">{toast}</div>}
+      <div className="view-assets-main page-animate">
+        {toast && <div className="toast">{toast}</div> } 
 
         <div className="view-assets-header">
           <h1 className="view-assets-title">Your Digital Legacy</h1>
@@ -213,6 +227,7 @@ setToast('Error deleting nominee: ' + error.message);
 
                 {searchQuery && (
                   <button className="btn btn-primary" onClick={() => setSearchQuery('')}>
+
                     Clear Search
                   </button>
                 )}
@@ -257,6 +272,7 @@ setToast('Error deleting nominee: ' + error.message);
                               onClick={(e) => { e.stopPropagation(); togglePassword(asset.id); }}
                               title={isShowingPassword ? 'Hide' : 'Show'}
                             >
+
 {isShowingPassword ? 'Hide' : 'Show'}
                             </button>
 
@@ -361,6 +377,7 @@ setToast('Error deleting nominee: ' + error.message);
                             className="btn btn-edit"
                             style={{ padding: "8px 15px", background: "#f59e0b", color: "white", border: "none", borderRadius: "6px", cursor: "pointer", fontSize: "14px", transition: "background 0.3s ease" }}
                           >
+
                             Edit
                           </button>
 
@@ -369,6 +386,7 @@ setToast('Error deleting nominee: ' + error.message);
                             className="btn btn-delete"
                             style={{ padding: "8px 15px", background: "#6b7280", color: "white", border: "none", borderRadius: "6px", cursor: "pointer", fontSize: "14px", transition: "background 0.3s ease" }}
                           >
+
                             Delete
                           </button>
 

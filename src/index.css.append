@@ -1,0 +1,11 @@
+/* AppLayout + Lazy support */
+.ml-\\[260px\\] { margin-left: 260px !important; }
+.loading-fallback { 
+  @apply min-h-screen flex items-center justify-center bg-slate-900 text-white dark:bg-white dark:text-slate-900 p-8 font-semibold; 
+}
+@keyframes pageFadeIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

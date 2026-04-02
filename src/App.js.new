@@ -1,0 +1,115 @@
+/** FIXED: Webpack TDZ via lazy routes + AppLayout. Step 3/6 **/
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from "react-router-dom";
+import { Suspense, lazy, useEffect, useCallback } from "react";
+import { auth } from "./services/firebase";
+import { signOut } from "firebase/auth";
+
+// Static public pages (minimal, no lazy needed)
+import Landing from "./pages/Landing";
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
+
+// Lazy protected layout & pages (BREAKS TDZ)
+const AppLayout = lazy(() => import("./layout/AppLayout"));
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const AddAsset = lazy(() => import("./pages/AddAsset"));
+const ViewAssets = lazy(() => import("./pages/ViewAssets"));
+const Nominee = lazy(() => import("./pages/Nominee"));
+const Profile = lazy(() => import("./pages/Profile"));
+const Settings = lazy(() => import("./pages/Settings"));
+const Vault = lazy(() => import("./pages/Vault"));
+const Will = lazy(() => import("./pages/Will"));
+const NomineeVerify = lazy(() => import("./pages/NomineeVerify"));
+const EmergencyAccess = lazy(() => import("./pages/EmergencyAccess"));
+
+function ProtectedRoutes() {
+  return (
+    <Suspense fallback={<div className="loading-fallback">Loading app...</div>}>
+      <AppLayout>
+        <Routes>
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/add-asset" element={<AddAsset />} />
+          <Route path="/view-assets" element={<ViewAssets />} />
+          <Route path="/nominee" element={<Nominee />} />
+          <Route path="/nominee-verify" element={<NomineeVerify />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/settings" element={<Settings />} />
+          <Route path="/vault" element={<Vault />} />
+          <Route path="/will" element={<Will />} />
+          <Route path="/emergency-access" element={<EmergencyAccess />} />
+          <Route path="*" element={<Navigate to="/dashboard" replace />} />
+        </Routes>
+      </AppLayout>
+    </Suspense>
+  );
+}
+
+function AppContent() {
+  const navigate = useNavigate();
+  let logoutTimer;
+
+  const resetTimer = useCallback(() => {
+    if (logoutTimer) clearTimeout(logoutTimer);
+
+    const saved = localStorage.getItem("datalegacy-settings");
+
+    if (saved) {
+      const parsed = JSON.parse(saved);
+
+      if (parsed.autoLogout && parsed.autoLogout !== "never") {
+        const times = {
+          "5min": 5 * 60 * 1000,
+          "15min": 15 * 60 * 1000,
+          "30min": 30 * 60 * 1000,
+          "1hr": 60 * 60 * 1000,
+        };
+
+        logoutTimer = setTimeout(() => {
+          signOut(auth).then(() => navigate("/login"));
+        }, times[parsed.autoLogout]);
+      }
+    }
+  }, [navigate]);
+
+  useEffect(() => {
+    const events = ["mousemove", "keydown", "mousedown", "scroll"];
+
+    events.forEach((event) =>
+      document.addEventListener(event, resetTimer)
+    );
+
+    resetTimer();
+
+    return () => {
+      events.forEach((event) =>
+        document.removeEventListener(event, resetTimer)
+      );
+
+      if (logoutTimer) clearTimeout(logoutTimer);
+    };
+  }, [resetTimer]);
+
+  return (
+    <Routes>
+      {/* Public */}
+      <Route path="/" element={<Landing />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/signup" element={<Signup />} />
+      
+      {/* Protected */}
+      <Route path="/app/*" element={<ProtectedRoutes />} />
+      <Route path="*" element={<Navigate to="/app/dashboard" replace />} />
+    </Routes>
+  );
+}
+
+function App() {
+  return (
+    <Router>
+      <AppContent />
+    </Router>
+  );
+}
+
+export default App;
+

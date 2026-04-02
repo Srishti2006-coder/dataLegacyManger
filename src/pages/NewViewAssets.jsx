@@ -366,4 +366,3 @@ const styles = {
 };
 
 export default ViewAssets;
-

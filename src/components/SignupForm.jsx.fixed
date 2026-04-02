@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { auth } from '../services/firebase';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth, db } from '../services/firebase';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
 
-export const LoginForm = () => {
+const SignupForm = () => {
   const navigate = useNavigate();
   const canvasRef = useRef(null);
   const [email, setEmail] = useState("");
@@ -12,73 +13,64 @@ export const LoginForm = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [particles, setParticles] = useState([]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
     const ctx = canvas.getContext('2d');
-    const container = canvas.parentElement;
-    if (!container) return;
-
-    const resizeCanvas = () => {
-      canvas.width = container.clientWidth;
-      canvas.height = container.clientHeight;
-    };
-    resizeCanvas();
-
-    const resizeObserver = new ResizeObserver(resizeCanvas);
-    resizeObserver.observe(container);
-
-    let particles = [];
-    const maxParticles = 50;
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
 
     const createParticle = () => ({
       x: Math.random() * canvas.width,
       y: canvas.height + 10,
       size: Math.random() * 4 + 1,
       speed: Math.random() * 2 + 0.5,
-      opacity: Math.random() * 0.6 + 0.2
+      opacity: Math.random() * 0.8 + 0.2
     });
 
-    let rafId;
-    const animate = () => {
+    const animateParticles = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      // Add new particles
-      if (particles.length < maxParticles) {
-        particles.push(createParticle());
+      const newParticles = [];
+      for (let i = 0; i < 3; i++) {
+        newParticles.push(createParticle());
       }
-
-      // Update and draw
-      particles = particles.filter(p => {
-        p.y -= p.speed;
-        if (p.y < -10) return false;
-
-        ctx.save();
-        ctx.globalAlpha = p.opacity;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(99, 102, 241, 0.6)';
-        ctx.fill();
-        ctx.restore();
-        return true;
-      });
-
-      rafId = requestAnimationFrame(animate);
+      setParticles(prev => [...prev.slice(-20), ...newParticles].filter(p => p.y > -10));
     };
-    animate();
 
-    return () => {
-      resizeObserver.disconnect();
-      if (rafId) cancelAnimationFrame(rafId);
-    };
+    const interval = setInterval(animateParticles, 300);
+    return () => clearInterval(interval);
   }, []);
 
-  const handleLogin = async (e) => {
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    particles.forEach(p => {
+      ctx.save();
+      ctx.globalAlpha = p.opacity;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(16, 185, 129, 0.8)';
+      ctx.fill();
+      ctx.restore();
+      p.y -= p.speed;
+    });
+  }, [particles]);
+
+  const handleSignup = async (e) => {
     e.preventDefault();
     if (!email || !password) {
       setError("Please fill in all fields");
+      return;
+    }
+
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters");
       return;
     }
 
@@ -87,41 +79,37 @@ export const LoginForm = () => {
     setSuccess("");
 
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-      setSuccess("Login successful! Welcome back.");
-      setTimeout(() => navigate("/dashboard"), 1500);
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      await setDoc(doc(db, "users", user.uid), {
+        email: user.email,
+        createdAt: serverTimestamp()
+      });
+
+      setSuccess("Account created successfully! Redirecting...");
+      setTimeout(() => navigate("/login"), 1500);
     } catch (error) {
-      const errorCode = error.code;
-      let message = 'Login failed. Please try again.';
-      if (errorCode === 'auth/wrong-password') {
-        message = 'Incorrect password.';
-      } else if (errorCode === 'auth/user-not-found') {
-        message = 'No account found with this email.';
-      } else if (errorCode === 'auth/invalid-email') {
-        message = 'Invalid email address.';
-      } else {
-        message = error.message;
-      }
-      setError(message);
+      setError(error.message);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="full-screen-auth-container page-animate">
-      <div className="minimal-auth-form">
-
+    <div className="glass-auth-container page-animate">
+      <canvas ref={canvasRef} className="particles-canvas" />
+      <div className="glass-card neon-glow p-8 md:p-12 max-w-md w-full mx-4 md:mx-auto">
         <div className="text-center mb-8">
-          <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent mb-4">
-            Welcome Back
+          <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent mb-4">
+            Create Account
           </h2>
           <p className="text-xl text-slate-300 max-w-sm mx-auto">
-            Securely access your digital legacy vault
+            Safeguard your digital legacy for generations
           </p>
         </div>
 
-        <form onSubmit={handleLogin} className="space-y-6">
+        <form onSubmit={handleSignup} className="space-y-6">
           <div className="clean-input-group">
             <input
               className="clean-input neon-glow"
@@ -147,17 +135,17 @@ export const LoginForm = () => {
               <label className="clean-label">Password</label>
               <button
                 type="button"
-                className="password-toggle absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-indigo-400 transition-colors"
+                className="password-toggle absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-emerald-400 transition-colors"
                 onClick={() => setShowPassword(!showPassword)}
                 aria-label={showPassword ? "Hide password" : "Show password"}
               >
-                {showPassword ? 'Hide' : 'Show'}
+                {showPassword ? "🙈" : "👁️"}
               </button>
             </div>
           </div>
 
           {error && (
-            <div className="auth-error bg-red-500/20 border border-red-500/50 backdrop-blur-sm rounded-2xl p-4 text-red-100">
+            <div className="bg-red-500/20 backdrop-blur-sm border border-red-500/50 rounded-2xl p-4 text-red-100">
               {error}
             </div>
           )}
@@ -170,24 +158,24 @@ export const LoginForm = () => {
             {loading ? (
               <>
                 <span className="loading-spinner mr-2"></span>
-                Signing in...
+                Creating Account...
               </>
             ) : (
-              "Enter Your Legacy"
+              "Secure Your Legacy"
             )}
           </button>
 
-{success && (
-            <div key="success" className="auth-success bg-emerald-500/20 backdrop-blur-sm border border-emerald-500/50 rounded-2xl p-4 text-emerald-100">
+          {success && (
+            <div className="auth-success bg-emerald-500/20 backdrop-blur-sm border border-emerald-500/50 rounded-2xl p-4 text-emerald-100">
               {success}
             </div>
           )}
 
           <div className="text-center pt-6 border-t border-slate-800">
             <p className="text-slate-400 text-sm">
-              Don't have an account?{' '}
-              <a href="/signup" className="auth-link font-semibold hover:neon-glow inline-flex items-center gap-1">
-                Create one now <span aria-hidden="true">→</span>
+              Already have an account?{' '}
+              <a href="/login" className="auth-link font-semibold hover:neon-glow inline-flex items-center gap-1">
+                Sign in <span aria-hidden="true">←</span>
               </a>
             </p>
           </div>
@@ -196,4 +184,6 @@ export const LoginForm = () => {
     </div>
   );
 };
+
+export default SignupForm;
 
